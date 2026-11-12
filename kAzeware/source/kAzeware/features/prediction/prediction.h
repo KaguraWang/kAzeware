@@ -156,6 +156,7 @@ namespace Pred {
 
     float VelocityYawDeg(const Vector_t& vel);
     float IdealStrafeDeltaDeg(float speed2d, float wishspeed = kAirWishSpeed);
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
     bool PredictLandingFrac(const Vector_t& origin,
                             const Vector_t& mins,

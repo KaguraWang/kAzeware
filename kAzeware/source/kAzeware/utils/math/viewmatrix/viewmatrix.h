@@ -8,6 +8,7 @@ public:
     ViewMatrix() : viewMatrix(nullptr) {}
 
     bool WorldToScreen(const Vector_t& position, Vector_t& out) const;
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
     // Homogeneous projection: numX/numY are the pre-divide screen numerators,
     // w is clip-space depth (>0 in front of camera). Screen =

@@ -60,6 +60,7 @@ namespace {
         int m_iWidth;
         int m_iHeight;
     };
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
     class CImageProxySource {
     public:

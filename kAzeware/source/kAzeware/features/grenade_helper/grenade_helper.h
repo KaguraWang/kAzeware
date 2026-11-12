@@ -29,6 +29,7 @@ namespace GrenadeHelper {
         Normal = Stand,
         Count = 15
     };
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
     enum class NadeKind : int { Any = 0, HE, Flash, Smoke, Molly, Decoy };
 

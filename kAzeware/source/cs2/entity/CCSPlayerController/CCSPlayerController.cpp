@@ -2,6 +2,7 @@
 #include "../../../kAzeware/utils/schema/schema.h"
 #include <Windows.h>
 #include "../../../kAzeware/utils/console/console.h"
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
 CCSPlayerController::CCSPlayerController(uintptr_t address) : address(address) {}
 

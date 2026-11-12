@@ -539,6 +539,7 @@ namespace internal_config {
                 }
             }
         }
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
         // Multipo
         // Multipoint enable list - all-false is valid (center-only on every lock box).

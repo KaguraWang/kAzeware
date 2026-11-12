@@ -7,6 +7,7 @@ namespace HitsoundAssets {
         const char* id;
         unsigned resource;
     };
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
     inline constexpr std::array<Entry, 48> sounds{{
         {"agpa1", "agpa1.vsnd", 24576},

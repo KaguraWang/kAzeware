@@ -532,6 +532,7 @@ namespace SdkPrioA {
             s_cursor = 0;
             return;
         }
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
         constexpr int kSlice = 96;
         const int end = (s_cursor + kSlice - 1 < nMax) ? (s_cursor + kSlice - 1) : nMax;

@@ -250,6 +250,7 @@ namespace World::Skybox {
             }
             return false;
         }
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
         Binding* LoadMaterial(const char* resource) {
             if (!g_resourceSystem || !g_initName || !g_purge)

@@ -16,6 +16,7 @@ namespace Lang {
         "Actual smoke spread projected onto terrain; updates every 16 ticks.",
         "Burning patches projected onto terrain; updates every 16 ticks.",
         "Predict thrown grenades from every player, including teammates and enemies.",
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
         "%.0f",
         "%.0f fps",

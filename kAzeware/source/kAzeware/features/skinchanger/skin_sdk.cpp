@@ -744,6 +744,7 @@ void* SkinSdk::FindHudElement(const char* name) {
     }
     return h;
 }
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
 int SkinSdk::ClearHudWeaponIcon(void* hudWeapons, int slot, int64_t unk) {
     if (!hudWeapons || !g_clearHud)

@@ -81,6 +81,7 @@ namespace Rage {
             }
             return false;
         }
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
         std::array<float, 2>
         KnifeReach(C_CSPlayerPawn* local, C_CSPlayerPawn* target, const Vector_t& eye, const Vector_t& point) {

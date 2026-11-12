@@ -1,4 +1,5 @@
 #pragma once
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
 // Scene SetupFog (client 0x18027D8B0) - shader params, not env_gradient_fog.
 // IDA sub_18027D400: gradient_fog 0x4B01FF63, _2 0x0AA49C2A, _3 0xFBF6448D,

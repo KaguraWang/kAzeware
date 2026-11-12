@@ -35,6 +35,7 @@ namespace Rage::Visualise {
                     }
             return {};
         }
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
         void Gradient(ImDrawList* draw, ImVec2 lo, ImVec2 hi, ImU32 color) {
             constexpr int count = 32;

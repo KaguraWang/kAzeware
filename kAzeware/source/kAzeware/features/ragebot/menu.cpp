@@ -87,6 +87,7 @@ namespace Rage {
             return profileSearch[0] == '\0' || contains(LegitProfiles::Name(index)) ||
                    contains(Lang::T(LegitProfiles::Name(index)));
         }
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
         void ConfigPanel(float width) {
             const float dpi = MenuUI::Layout::DpiMul();

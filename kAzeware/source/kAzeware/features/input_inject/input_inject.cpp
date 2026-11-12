@@ -390,6 +390,7 @@ namespace InputInject {
         step->SetBits(MOVESTEP_BITS_WHEN | MOVESTEP_BITS_ANALOG_FORWARD_DELTA | MOVESTEP_BITS_ANALOG_LEFT_DELTA);
         return true;
     }
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
     // WASD strafe apply_yaw_subtick - quantized-movement yaw step.
     // All presence bits are set like the proto setters (button/

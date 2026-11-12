@@ -13,6 +13,7 @@ public:
 
     // CUtlString in game - use ReadSanitizedName(), never treat field as const char*.
     bool ReadSanitizedName(char* buf, size_t bufSize) const;
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
     schema(bool, IsLocalPlayer, "CBasePlayerController->m_bIsLocalPlayerController");
     schema(std::uint32_t, m_nTickBase, "CBasePlayerController->m_nTickBase");

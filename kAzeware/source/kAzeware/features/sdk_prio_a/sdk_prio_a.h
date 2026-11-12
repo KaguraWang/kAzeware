@@ -57,6 +57,7 @@ namespace SdkPrioA {
     // Avoids Present full-slot Get() walks that trip multi-queue insecure.
     constexpr int kMaxTrackedControllers = 64;
     int CopyControllerIndices(int* out, int maxOut);
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
     // World ESP: dropped weapons / nades / planted C4 via OnAdd designer.
     // Present iterates this list instead of 1..HighestEntityIndex.

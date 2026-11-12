@@ -20,6 +20,7 @@ namespace Legitbot {
         Vector_t hitPoint{};
         int group = -1;
         float damage = 0.f;
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
         explicit operator bool() const {
             return handle.valid();

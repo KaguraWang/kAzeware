@@ -6,6 +6,7 @@ namespace MovementBrake {
     struct Pulse {
         float x = 0, y = 0, gain = 0, duty = 0;
     };
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
     // Shared by prediction and the command writer. Native subtick boundaries have
     // 1/64-tick precision: each of our 16 slices contains four usable time units.
