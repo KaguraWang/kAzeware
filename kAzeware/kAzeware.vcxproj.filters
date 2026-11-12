@@ -85,6 +85,7 @@
     <ClInclude Include="source\kAzeware\features\legitbot\visuals.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="source\kAzeware\features\legitbot\target.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="source\kAzeware\features\legitbot\legit_math.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="source\kAzeware\menu\control_look.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="source\kAzeware\kAzeware.h">
       <Filter>Header Files</Filter>
     </ClInclude>

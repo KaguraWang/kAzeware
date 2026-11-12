@@ -190,10 +190,10 @@ namespace Rage {
         if (!ProfileOverride(editedProfile))
             editedProfile = 0;
         const float dpi = MenuUI::Layout::DpiMul();
-        const float fit = (std::min)(1.f, ImGui::GetContentRegionAvail().y / (660.f * dpi));
+        const float fit = (std::min)(1.f, ImGui::GetContentRegionAvail().y / (730.f * dpi));
         ImGui::PushFont(nullptr, ImGui::GetFontSize() * fit);
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.f * dpi * fit, 2.f * dpi * fit));
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(6.f * dpi * fit, 4.f * dpi * fit));
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.f * dpi * fit, 3.f * dpi * fit));
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(6.f * dpi * fit, 7.f * dpi * fit));
         const float available = ImGui::GetContentRegionAvail().x;
         const float configWidth = std::clamp(available * .18f, 140.f * dpi, 220.f * dpi);
         const float accuracyWidth = (available - configWidth - 2.f * gap) * .5f;

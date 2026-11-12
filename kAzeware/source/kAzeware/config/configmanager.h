@@ -1,4 +1,4 @@
-#include "../features/world/skybox.h"
+﻿#include "../features/world/skybox.h"
 #include "../features/ragebot/profiles.h"
 #pragma once
 
@@ -1165,6 +1165,9 @@ namespace internal_config {
             j["widget_keybinds"] = keybind.baseValue(Config::widget_keybinds);
             j["widget_bomb"] = keybind.baseValue(Config::widget_bomb);
             j["widget_spectators"] = keybind.baseValue(Config::widget_spectators);
+            j["widget_funclist"] = keybind.baseValue(Config::widget_funclist);
+            j["widget_funclist_edge"] = Config::widget_funclist_edge;
+            j["widget_funclist_along"] = Config::widget_funclist_along;
             j["widget_keybinds_pos"] = {Config::widget_keybinds_pos.x, Config::widget_keybinds_pos.y};
             j["widget_bomb_pos"] = {Config::widget_bomb_pos.x, Config::widget_bomb_pos.y};
             j["widget_spectators_pos"] = {Config::widget_spectators_pos.x, Config::widget_spectators_pos.y};
@@ -1196,9 +1199,10 @@ namespace internal_config {
             auto& legit = j["legitbot"];
             legit = SaveLegitConfig(Config::legitbot);
             for (int index = 1; index < LegitProfiles::kCount; ++index)
-                legit["profiles"][std::to_string(index)] = {{"enabled", LegitProfiles::Override(index)},
-                                                            {"initialized", LegitProfiles::Initialized(index)},
-                                                            {"values", SaveLegitConfig(LegitProfiles::At(index))}};
+                if (LegitProfiles::Override(index))
+                    legit["profiles"][std::to_string(index)] = {{"enabled", true},
+                                                                {"initialized", true},
+                                                                {"values", SaveLegitConfig(LegitProfiles::At(index))}};
             j["ragebot"] = Rage::SaveSettings();
             j["melee"] = {{"knife", keybind.baseValue(Config::melee.knife)},
                           {"knife_dt", keybind.baseValue(Config::melee.knife_dt)},
@@ -1837,6 +1841,9 @@ namespace internal_config {
                 Config::widget_keybinds = j.value("widget_keybinds", false);
                 Config::widget_bomb = j.value("widget_bomb", false);
                 Config::widget_spectators = j.value("widget_spectators", false);
+                Config::widget_funclist = j.value("widget_funclist", false);
+                Config::widget_funclist_edge = std::clamp(j.value("widget_funclist_edge", 0), 0, 3);
+                Config::widget_funclist_along = std::clamp(j.value("widget_funclist_along", .5f), 0.f, 1.f);
                 Config::widget_keybinds_only_when_active = j.value("widget_keybinds_only_when_active", false);
                 Config::widget_keybinds_show_all = j.value("widget_keybinds_show_all", true);
                 Config::widget_bomb_show_damage = j.value("widget_bomb_show_damage", true);
@@ -1946,10 +1953,10 @@ namespace internal_config {
                 if (profiles.is_object())
                     for (int index = 1; index < LegitProfiles::kCount; ++index) {
                         const auto it = profiles.find(std::to_string(index));
-                        if (it == profiles.end() || !it->is_object())
+                        if (it == profiles.end() || !it->is_object() || !it->value("enabled", false))
                             continue;
                         LoadLegitConfig(it->value("values", nlohmann::json::object()), LegitProfiles::At(index));
-                        LegitProfiles::SetLoaded(index, it->value("enabled", false), it->value("initialized", true));
+                        LegitProfiles::SetLoaded(index, true, true);
                     }
                 Rage::LoadSettings(j.value("ragebot", nlohmann::json::object()));
                 Config::movement = {};
