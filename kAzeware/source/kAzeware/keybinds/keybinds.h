@@ -80,6 +80,7 @@ public:
 
     BindingTarget* find(void* value);
     BindingTarget* find(const std::string& id);
+    void clearPrefix(const std::string& prefix);
     void contextMenu(void* value, const char* label, bool bounded = false, float low = 0.f, float high = 0.f);
     void contextMenu(const std::string& id, const char* label);
     void manualChange(void* value);
@@ -94,7 +95,7 @@ public:
 
     void onWindowMessage(unsigned msg, std::uintptr_t wParam, std::intptr_t lParam);
     void pollInputs(bool menuOpen);
-    void processKeyEvent(int key, bool down, bool allowActivation);
+    void processKeyEvent(int key, bool down, bool allowActivation, double time = -1.0);
 
     bool isActive(bool& feature) const {
         return feature;
@@ -123,6 +124,13 @@ private:
         int key;
         bool down;
         bool raw = false;
+        bool repeat = false;
+        double time = 0.0; // Milliseconds, captured when the input arrived.
+    };
+    // A key edge taken from polling before its window message was delivered.
+    struct PolledEdge {
+        bool down;
+        std::uint64_t tick;
     };
 
     std::map<std::string, BindingTarget> targets_;
@@ -130,8 +138,11 @@ private:
     std::vector<KeyEvent> events_;
     std::array<bool, 256> rawKeys_{}; // Protected by eventsMutex_; raw input owns these keys.
     std::array<bool, 256> down_{};
+    std::array<std::vector<PolledEdge>, 256> polled_{};
+    std::array<double, 256> releasedAt_{};
     bool initialized_ = false, sampled_ = false, waitRelease_ = false;
     std::uint64_t nextId_ = 1, nextOrder_ = 1, listening_ = 0;
+    bool consumePolledEdge(const KeyEvent& event, std::uint64_t now);
     void apply(BindingTarget& target);
     void reconcile();
     void editor(BindingTarget& target);

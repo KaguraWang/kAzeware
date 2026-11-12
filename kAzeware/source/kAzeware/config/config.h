@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "../../../external/imgui/imgui.h"
 #include <atomic>
 #include <cstdint>
@@ -681,6 +681,9 @@ namespace Config {
 
     extern bool widget_keybinds;
     extern bool widget_bomb;
+    extern bool widget_funclist;
+    extern int widget_funclist_edge; // 0 left, 1 right, 2 top, 3 bottom
+    extern float widget_funclist_along;
     extern bool widget_spectators;
 
     extern ImVec2 widget_keybinds_pos;

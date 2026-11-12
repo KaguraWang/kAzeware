@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "language.h"
+#include "../menu/control_look.h"
 #include "../../../external/imgui/imgui.h"
 #include <utility>
 #include <vector>
@@ -24,9 +25,12 @@ namespace UiText {
         return ImGui::SmallButton(id.c_str(), std::forward<Args>(args)...);
     }
 
-    template <class... Args> bool Checkbox(const char* label, Args&&... args) {
+    inline bool Checkbox(const char* label, bool* value) {
         const auto id = Lang::Label(label);
-        return ImGui::Checkbox(id.c_str(), std::forward<Args>(args)...);
+        ControlLook::BeginCheckbox(id.c_str(), *value);
+        const bool changed = ImGui::Checkbox(id.c_str(), value);
+        ControlLook::EndCheckbox(changed, *value);
+        return changed;
     }
 
     template <class... Args> bool RadioButton(const char* label, Args&&... args) {
@@ -56,7 +60,10 @@ namespace UiText {
 
     template <class... Args> bool BeginCombo(const char* label, Args&&... args) {
         const auto id = Lang::Label(label);
-        return ImGui::BeginCombo(id.c_str(), std::forward<Args>(args)...);
+        ControlLook::BeginCombo();
+        const bool open = ImGui::BeginCombo(id.c_str(), std::forward<Args>(args)...);
+        ControlLook::EndCombo();
+        return open;
     }
 
     template <class... Args> void Text(const char* format, Args&&... args) {
@@ -114,7 +121,10 @@ namespace UiText {
         for (int i = 0; i < count; i++)
             translated.push_back(Lang::T(items[i]));
         const auto id = Lang::Label(label);
-        return ImGui::Combo(id.c_str(), current, translated.data(), count, height);
+        ControlLook::BeginCombo();
+        const bool changed = ImGui::Combo(id.c_str(), current, translated.data(), count, height);
+        ControlLook::EndCombo();
+        return changed;
     }
 
     inline bool SliderFloat(const char* label,
@@ -124,13 +134,22 @@ namespace UiText {
                             const char* format = "%.3f",
                             ImGuiSliderFlags flags = 0) {
         const auto id = Lang::Label(label);
-        return ImGui::SliderFloat(id.c_str(), value, low, high, Lang::F(format), flags);
+        const char* shown = Lang::F(format);
+        ControlLook::BeginSlider(ControlLook::Fraction(*value, low, high), id[0] == '#' && id[1] == '#');
+        const bool changed = ImGui::SliderFloat(id.c_str(), value, low, high, shown, flags);
+        ControlLook::EndSlider(ControlLook::Fraction(*value, low, high), ImGuiDataType_Float, value, shown);
+        return changed;
     }
 
     inline bool
     SliderInt(const char* label, int* value, int low, int high, const char* format = "%d", ImGuiSliderFlags flags = 0) {
         const auto id = Lang::Label(label);
-        return ImGui::SliderInt(id.c_str(), value, low, high, Lang::F(format), flags);
+        const char* shown = Lang::F(format);
+        ControlLook::BeginSlider(ControlLook::Fraction(float(*value), float(low), float(high)), id[0] == '#' && id[1] == '#');
+        const bool changed = ImGui::SliderInt(id.c_str(), value, low, high, shown, flags);
+        ControlLook::EndSlider(
+            ControlLook::Fraction(float(*value), float(low), float(high)), ImGuiDataType_S32, value, shown);
+        return changed;
     }
 
     inline bool InputFloat(const char* label,

@@ -196,7 +196,7 @@ static void AbortPresentInit() {
     } __except (EXCEPTION_EXECUTE_HANDLER) {
     }
     if (oWndProc && window) {
-        SetWindowLongPtrW(window, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(oWndProc));
+        SetWindowLongPtrA(window, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(oWndProc));
         oWndProc = nullptr;
     }
     if (mainRenderTargetView) {
@@ -304,7 +304,7 @@ static HRESULT __stdcall hkPresentInner(IDXGISwapChain* pSwapChain, UINT SyncInt
         }
 
         if (!oWndProc) {
-            const LONG_PTR prev = SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)WndProc);
+            const LONG_PTR prev = SetWindowLongPtrA(window, GWLP_WNDPROC, (LONG_PTR)WndProc);
             if (prev) {
                 oWndProc = (WNDPROC)prev;
             } else {
@@ -891,7 +891,7 @@ static void MainThreadBody(LPVOID lpReserved) {
     (void)g_presentHook.disable();
     // Full unload: all game hooks BEFORE FreeLibrary (was Present-only -> post-unload AV).
     if (oWndProc != nullptr) {
-        SetWindowLongPtrW(window, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(oWndProc));
+        SetWindowLongPtrA(window, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(oWndProc));
         oWndProc = nullptr;
         // WndProc now tracks depth - drain message-thread frames before unmap.
         H::Hooks::WaitForQuiescence(100);

@@ -10,7 +10,9 @@
 #include <cstring>
 #include <cstdio>
 #include <algorithm>
+#include <cctype>
 #include <cmath>
+#include <string_view>
 #include "../config/configmanager.h"
 
 #include "../keybinds/keybinds.h"
@@ -320,31 +322,126 @@ static void LegitCurveEditor(std::array<float, 8>& points) {
     }
 }
 
-static void LegitMenu(float half, float gap) {
-    LegitProfiles::RefreshHeld();
-    int selected = LegitProfiles::EditIndex();
-    const char* names[LegitProfiles::kCount];
-    for (int i = 0; i < LegitProfiles::kCount; ++i)
-        names[i] = LegitProfiles::Name(i);
-    ImGui::SetNextItemWidth(-1.f);
-    if (UiText::Combo("##weapon_profile", &selected, names, LegitProfiles::kCount))
-        LegitProfiles::SetEditIndex(selected);
-    if (selected) {
-        bool enabled = LegitProfiles::Override(selected);
-        if (UiText::Checkbox("Use this configuration", &enabled))
-            LegitProfiles::SetOverride(selected, enabled);
-        if (!enabled) {
-            const int parent = LegitProfiles::Parent(selected);
-            UiText::TextDisabled("Inherits: %s",
-                                 Lang::T(LegitProfiles::Name(LegitProfiles::Override(parent) ? parent : 0)));
+static bool LegitWeaponProfile(int index) {
+    return index >= LegitProfiles::kGroups || index == 7 || index == 8;
+}
+
+static void LegitConfigPanel(float width) {
+    static char search[96]{};
+    const float dpi = MenuUI::Layout::DpiMul();
+    const int edited = LegitProfiles::Resolve(LegitProfiles::EditIndex());
+    const auto matches = [](int index) {
+        const auto contains = [](const char* text) {
+            const std::string_view value(text), needle(search);
+            return std::search(value.begin(), value.end(), needle.begin(), needle.end(), [](unsigned char a, unsigned char b) {
+                       return std::tolower(a) == std::tolower(b);
+                   }) != value.end();
+        };
+        return search[0] == '\0' || contains(LegitProfiles::Name(index)) ||
+               contains(Lang::T(LegitProfiles::Name(index)));
+    };
+    MenuUI::BeginCard("##legit_profiles", width, false);
+    MenuUI::Section("Config");
+    ImGui::SameLine();
+    ImGui::SetCursorPosX(ImGui::GetWindowContentRegionMax().x - ImGui::GetFrameHeight());
+    if (UiText::Button("+", ImVec2(ImGui::GetFrameHeight(), ImGui::GetFrameHeight()))) {
+        search[0] = '\0';
+        ImGui::OpenPopup("##add_legit_profile");
+    }
+    ImGui::SetNextWindowSize(ImVec2(360.f * dpi, (std::min)(380.f * dpi, ImGui::GetIO().DisplaySize.y - 24.f)),
+                             ImGuiCond_Appearing);
+    if (ImGui::BeginPopup("##add_legit_profile")) {
+        if (ImGui::IsWindowAppearing())
+            ImGui::SetKeyboardFocusHere();
+        ImGui::SetNextItemWidth(-1);
+        UiText::InputTextWithHint("##legit_profile_search", "Search weapons / groups", search, sizeof(search));
+        ImGui::BeginChild("##legit_available_profiles", ImVec2(0, 0));
+        const int held = LegitProfiles::HeldWeaponIndex() ? LegitProfiles::HeldWeaponIndex()
+                                                          : LegitProfiles::HeldGroupIndex();
+        const auto add = [&](int index) {
+            if (!matches(index))
+                return;
+            ImGui::PushID(index);
+            ImGui::BeginDisabled(LegitProfiles::Override(index));
+            if (UiText::Selectable(LegitProfiles::Name(index), false, 0, ImVec2(0, ImGui::GetFrameHeight()))) {
+                LegitProfiles::SetOverride(index, true);
+                LegitProfiles::SetEditIndex(index);
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndDisabled();
+            ImGui::PopID();
+        };
+        if (held > 0 && matches(held)) {
+            UiText::TextDisabled("%s", Lang::T("Held weapon"));
+            add(held);
+            ImGui::Separator();
+        }
+        for (int kind = 0; kind < 2; ++kind) {
+            bool heading = false;
+            for (int i = 1; i < LegitProfiles::kCount; ++i) {
+                if (i == held || LegitProfiles::Override(i) || LegitWeaponProfile(i) != bool(kind) || !matches(i))
+                    continue;
+                if (!heading) {
+                    UiText::TextDisabled("%s", Lang::T(kind ? "Weapons" : "Weapon groups"));
+                    heading = true;
+                }
+                add(i);
+            }
+        }
+        ImGui::EndChild();
+        ImGui::EndPopup();
+    }
+    ImGui::BeginChild("##legit_configured_profiles", ImVec2(0, 0));
+    bool any = false;
+    for (int kind = 0; kind < 3; ++kind) {
+        bool heading = false;
+        for (int i = 0; i < LegitProfiles::kCount; ++i) {
+            const int category = i == 0 ? 0 : LegitWeaponProfile(i) ? 2 : 1;
+            if (category != kind || !LegitProfiles::Override(i))
+                continue;
+            if (!heading && any)
+                ImGui::Separator();
+            heading = any = true;
+            ImGui::PushID(i);
+            if (UiText::Selectable(LegitProfiles::Name(i), edited == i, 0, ImVec2(0, ImGui::GetFrameHeight())))
+                LegitProfiles::SetEditIndex(i);
+            if (i > 0 && ImGui::BeginPopupContextItem("##remove_legit_profile")) {
+                UiText::TextUnformatted("Remove this configuration?");
+                UiText::TextDisabled("%s", Lang::T(LegitProfiles::Name(i)));
+                if (UiText::Button("Remove")) {
+                    LegitProfiles::Remove(i);
+                    if (LegitProfiles::EditIndex() == i)
+                        LegitProfiles::SetEditIndex(0);
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::SameLine();
+                if (UiText::Button("Cancel"))
+                    ImGui::CloseCurrentPopup();
+                ImGui::EndPopup();
+            }
+            ImGui::PopID();
         }
     }
-    auto& c = LegitProfiles::At(LegitProfiles::Override(selected) ? selected : LegitProfiles::Resolve(selected));
-    ImGui::BeginDisabled(selected && !LegitProfiles::Override(selected));
+    ImGui::EndChild();
+    MenuUI::EndCard();
+}
+
+static void LegitMenu(float, float gap) {
+    LegitProfiles::RefreshHeld();
+    const float dpi = MenuUI::Layout::DpiMul();
+    const float available = ImGui::GetContentRegionAvail().x;
+    const float configWidth = std::clamp(available * .18f, 140.f * dpi, 220.f * dpi);
+    LegitConfigPanel(configWidth);
+    ImGui::SameLine(0, gap);
+    ImGui::BeginGroup();
+    const float half = floorf((available - configWidth - 2.f * gap) * .5f);
+    auto& c = LegitProfiles::At(LegitProfiles::Resolve(LegitProfiles::EditIndex()));
     static int page = 0;
-    static const char* tabs[] = {"Aim", "Targets", "Humanization", "Trigger / RCS", "Semi-rage"};
+    static const char* tabs[] = {"Aim", "Accuracy", "Humanization", "Trigger / RCS"};
     static const char* groups[] = {"Head", "Neck", "Chest", "Stomach", "Pelvis", "Arms", "Legs", "Feet"};
-    ui::SubNav(tabs, 5, &page);
+    page = std::clamp(page, 0, 3);
+    ui::SubNav(tabs, 4, &page);
+    ImGui::BeginGroup();
     ui::BeginCard("##legit_left", half, true);
     if (page == 0) {
         ui::SectionLabel("Legitbot");
@@ -367,7 +464,7 @@ static void LegitMenu(float half, float gap) {
         LegitFov("Horizontal FOV", "##horizontal_fov", &c.horizontal_fov);
         LegitCheck("Dynamic FOV", &c.dynamic_fov);
     } else if (page == 1) {
-        ui::SectionLabel("Targets");
+        ui::SectionLabel("Accuracy");
         MenuUI::OptionControls("Hitgroups", ImGui::GetFrameHeight());
         MenuUI::OptionGear("Hitgroups");
         MenuUI::OptionDivider();
@@ -463,56 +560,55 @@ static void LegitMenu(float half, float gap) {
         LegitHitchance(c);
         ImGui::EndDisabled();
         LegitDamage(c.min_damage);
-        LegitCheck("Scoped only (snipers)", &c.scoped_only);
-        ui::SectionLabel("Trigger checks");
-        static const char* checks[] = {"Visibility",
-                                       "Air (local)",
-                                       "Blinded (local)",
-                                       "Reload (local)",
-                                       "Switching weapon (local)",
-                                       "Smoke",
-                                       "Teammate"};
-        for (int i = 0; i < 7; ++i) {
-            ImGui::PushID(i);
-            LegitCheck(checks[i], &c.trigger_checks[i]);
-            ImGui::PopID();
+        MenuUI::OptionControls("Trigger checks", ImGui::GetFrameHeight());
+        MenuUI::OptionGear("Trigger checks");
+        MenuUI::OptionDivider();
+        if (MenuUI::BeginOptionSettings("Trigger checks")) {
+            LegitCheck("Scoped only (snipers)", &c.scoped_only);
+            static const char* checks[] = {"Visibility",
+                                           "Air (local)",
+                                           "Blinded (local)",
+                                           "Reload (local)",
+                                           "Switching weapon (local)",
+                                           "Smoke",
+                                           "Teammate"};
+            for (int i = 0; i < 7; ++i) {
+                ImGui::PushID(i);
+                LegitCheck(checks[i], &c.trigger_checks[i]);
+                ImGui::PopID();
+            }
+            ImGui::EndPopup();
         }
     }
-    if (page == 4) {
-        ui::SectionLabel("Semi-rage");
-        LegitCheck("Seed Trigger", &c.seed_trigger);
-        LegitCheck("Predictive Autostop", &c.autostop);
-        if (c.autostop)
-            LegitCheck("Air stop", &c.air_autostop);
-        LegitCheck("Predictive Autoscope", &c.autoscope);
-        UiText::TextWrapped(
-            c.seed_trigger ? "Uses predicted spread and Triggerbot Multipoint. Velocity check and HC are suspended."
-                           : "Keeps movement at walking speed. Uses Triggerbot damage and HC settings.");
-    }
     ui::EndCard();
-    if (page == 4) {
-        ImGui::EndDisabled();
-        return;
+    if (page == 1) {
+        ui::BeginCard("##legit_target_selection", half, true);
+        ui::SectionLabel("Target selection");
+        static const char* priorities[] = {"Crosshair", "Distance", "Health"};
+        ui::ComboFull("Target priority", "##target_priority", &c.target_priority, priorities, 3);
+        LegitFloat("Target stickiness", "##stickiness", &c.target_stickiness, 0.f, 100.f, "%.0f");
+        LegitCheck("Force BAIM", &c.force_baim);
+        ui::EndCard();
     }
+    ImGui::EndGroup();
     ImGui::SameLine(0, gap);
+    ImGui::BeginGroup();
     ui::BeginCard("##legit_right", 0, true);
     if (page == 0) {
         ui::SectionLabel("Smooth");
-        if (MenuUI::OptionSettings("Enable Smoothing", c.smoothing)) {
-            static const char* modes[] = {"Assist", "Magnet"};
-            ui::ComboFull("Aim mode", "##aim_mode", &c.aim_mode, modes, 2);
-            LegitSmooth("Vertical smooth", "##vertical_smooth", &c.vertical_smooth);
-            LegitSmooth("Horizontal smooth", "##horizontal_smooth", &c.horizontal_smooth);
-            LegitCheck("Dynamic smooth", &c.dynamic_smooth);
-            LegitFloat("Aim speed", "##aim_speed", &c.aim_speed, 1.f, 100.f, "%.0f");
-            LegitSliderInt("Aim delay", c.aim_delay, 0, 500, "%d ms");
-            LegitSliderInt("Aim duration", c.aim_duration, 0, 2000, "%d ms", &c.aim_duration_unlock);
-            LegitCheck("Target lock", &c.target_lock);
-            LegitFloat("Lock FOV", "##lock_fov", &c.lock_fov, 0.f, 30.f, "%.0f");
-            LegitSliderInt("Target switch delay", c.switch_delay, 0, 500, "%d ms");
-            LegitSliderInt("Delay after kill", c.kill_delay, 0, 500, "%d ms");
-            ImGui::EndPopup();
-        }
+        LegitCheck("Enable Smoothing", &c.smoothing);
+        static const char* modes[] = {"Assist", "Magnet"};
+        ui::ComboFull("Aim mode", "##aim_mode", &c.aim_mode, modes, 2);
+        LegitSmooth("Vertical smooth", "##vertical_smooth", &c.vertical_smooth);
+        LegitSmooth("Horizontal smooth", "##horizontal_smooth", &c.horizontal_smooth);
+        LegitCheck("Dynamic smooth", &c.dynamic_smooth);
+        LegitFloat("Aim speed", "##aim_speed", &c.aim_speed, 1.f, 100.f, "%.0f");
+        LegitSliderInt("Aim delay", c.aim_delay, 0, 500, "%d ms");
+        LegitSliderInt("Aim duration", c.aim_duration, 0, 2000, "%d ms", &c.aim_duration_unlock);
+        LegitCheck("Target lock", &c.target_lock);
+        LegitFloat("Lock FOV", "##lock_fov", &c.lock_fov, 0.f, 30.f, "%.0f");
+        LegitSliderInt("Target switch delay", c.switch_delay, 0, 500, "%d ms");
+        LegitSliderInt("Delay after kill", c.kill_delay, 0, 500, "%d ms");
     } else if (page == 1) {
         ui::SectionLabel("Trigger targets");
         MenuUI::OptionControls("Trigger hitgroups", ImGui::GetFrameHeight());
@@ -575,28 +671,31 @@ static void LegitMenu(float half, float gap) {
         LegitFloat("Hand tremor", "##tremor", &c.hand_tremor, 0.f, 100.f, "%.0f");
     } else if (page == 3) {
         ui::SectionLabel("RCS");
-        if (MenuUI::OptionSettings("Enable RCS", c.rcs)) {
-            LegitCheck("Standalone RCS", &c.standalone_rcs);
-            LegitFloat("RCS X", "##rcs_x", &c.rcs_x, 0.f, 100.f, "%.0f");
-            LegitFloat("RCS Y", "##rcs_y", &c.rcs_y, 0.f, 100.f, "%.0f");
-            LegitFloat("RCS smooth", "##rcs_smooth", &c.rcs_smooth, 0.f, 100.f, "%.0f");
-            LegitCheck("Dynamic RCS", &c.dynamic_rcs);
-            LegitCheck("Reset looking angle after RCS", &c.reset_angle);
-            LegitFloat("Reset smoothing", "##reset_smooth", &c.reset_smooth, 0.f, 100.f, "%.0f");
-            ImGui::EndPopup();
-        }
+        LegitCheck("Enable RCS", &c.rcs);
+        LegitCheck("Standalone RCS", &c.standalone_rcs);
+        LegitFloat("RCS X", "##rcs_x", &c.rcs_x, 0.f, 100.f, "%.0f");
+        LegitFloat("RCS Y", "##rcs_y", &c.rcs_y, 0.f, 100.f, "%.0f");
+        LegitFloat("RCS smooth", "##rcs_smooth", &c.rcs_smooth, 0.f, 100.f, "%.0f");
+        LegitCheck("Dynamic RCS", &c.dynamic_rcs);
+        LegitCheck("Reset looking angle after RCS", &c.reset_angle);
+        LegitFloat("Reset smoothing", "##reset_smooth", &c.reset_smooth, 0.f, 100.f, "%.0f");
     }
     ui::EndCard();
     if (page == 1) {
-        ui::BeginCard("##legit_target_selection", 0, true);
-        ui::SectionLabel("Target selection");
-        static const char* priorities[] = {"Crosshair", "Distance", "Health"};
-        ui::ComboFull("Target priority", "##target_priority", &c.target_priority, priorities, 3);
-        LegitFloat("Target stickiness", "##stickiness", &c.target_stickiness, 0.f, 100.f, "%.0f");
-        LegitCheck("Force BAIM", &c.force_baim);
+        ui::BeginCard("##legit_semi_rage", 0, true);
+        ui::SectionLabel("Semi-rage");
+        LegitCheck("Seed Trigger", &c.seed_trigger);
+        LegitCheck("Predictive Autostop", &c.autostop);
+        if (c.autostop)
+            LegitCheck("Air stop", &c.air_autostop);
+        LegitCheck("Predictive Autoscope", &c.autoscope);
+        UiText::TextWrapped(
+            c.seed_trigger ? "Uses predicted spread and Triggerbot Multipoint. Velocity check and HC are suspended."
+                           : "Keeps movement at walking speed. Uses Triggerbot damage and HC settings.");
         ui::EndCard();
     }
-    ImGui::EndDisabled();
+    ImGui::EndGroup();
+    ImGui::EndGroup();
 }
 
 void Menu::init(HWND& window,
@@ -862,10 +961,10 @@ void Menu::render() {
                 static const char* playerTabs[] = {"Local", "Friendly", "Enemy"};
                 ui::SubNav(playerTabs, 3, &playerSub);
                 if (playerSub == 0) {
-                    const float fit = (std::min)(1.f, ImGui::GetContentRegionAvail().y / (550.f * dpi));
+                    const float fit = (std::min)(1.f, ImGui::GetContentRegionAvail().y / (610.f * dpi));
                     ImGui::PushFont(nullptr, ImGui::GetFontSize() * fit);
-                    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.f * dpi * fit, 2.f * dpi * fit));
-                    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(6.f * dpi * fit, 4.f * dpi * fit));
+                    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.f * dpi * fit, 3.f * dpi * fit));
+                    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(6.f * dpi * fit, 7.f * dpi * fit));
                     MenuUI::Checkbox("Enable Local", &Config::local_visuals);
                     auto slider =
                         [](const char* name, const char* id, float* value, float lo, float hi, const char* format) {
@@ -1137,7 +1236,6 @@ void Menu::render() {
                     ImGui::BeginDisabled(!settings.enabled);
                     ui::BeginCard("##player_left", half, true);
                     ui::SectionLabel("Player ESP");
-                    UiText::TextDisabled("Right-click to bind. Use the gear for settings.");
 
                     if (!friendly) {
                         ui::FeatureToggle(
@@ -1277,19 +1375,23 @@ void Menu::render() {
                     ui::EndCard();
                     ImGui::SameLine(0, gap);
                     ui::BeginCard("##player_right", 0, true);
-                    ui::SectionLabel("Flags");
-                    UiText::TextDisabled("Active state labels (right of box)");
-                    MenuUI::Checkbox("Flashed", &settings.flag_flashed);
-                    MenuUI::Checkbox("Bomb", &settings.flag_bomb);
-                    MenuUI::Checkbox("Scoped", &settings.flag_scoped);
-                    MenuUI::Checkbox("Reloading", &settings.flag_reloading);
-                    MenuUI::Checkbox("Defusing", &settings.flag_defusing);
-                    MenuUI::Checkbox("Money", &settings.flag_money);
-                    MenuUI::Checkbox("Kit", &settings.flag_kit);
-                    MenuUI::Checkbox("Helmet", &settings.flag_helmet);
-                    MenuUI::Checkbox("Nades (H/F/S/M/D)", &settings.flag_nades);
-
-                    ui::SectionLabel("Extra ESP");
+                    MenuUI::Section("Extra ESP", true);
+                    MenuUI::OptionControls("Flags", ImGui::GetFrameHeight());
+                    MenuUI::OptionGear("Flags");
+                    MenuUI::OptionDivider();
+                    if (MenuUI::BeginOptionSettings("Flags")) {
+                        UiText::TextDisabled("Active state labels (right of box)");
+                        MenuUI::Checkbox("Flashed", &settings.flag_flashed);
+                        MenuUI::Checkbox("Bomb", &settings.flag_bomb);
+                        MenuUI::Checkbox("Scoped", &settings.flag_scoped);
+                        MenuUI::Checkbox("Reloading", &settings.flag_reloading);
+                        MenuUI::Checkbox("Defusing", &settings.flag_defusing);
+                        MenuUI::Checkbox("Money", &settings.flag_money);
+                        MenuUI::Checkbox("Kit", &settings.flag_kit);
+                        MenuUI::Checkbox("Helmet", &settings.flag_helmet);
+                        MenuUI::Checkbox("Nades (H/F/S/M/D)", &settings.flag_nades);
+                        ImGui::EndPopup();
+                    }
                     ui::FeatureToggle("Rank ESP", &settings.esp_rank, "Show competitive rank.");
                     if (MenuUI::SettingsPopup("##esp_rank_pop", {&settings.esp_rank_color})) {
                         ui::PopupTitle("Rank");
@@ -1327,7 +1429,7 @@ void Menu::render() {
                         ImGui::EndPopup();
                     }
                     if (!friendly) {
-                        ui::SectionLabel("Chams");
+                        MenuUI::Section("Chams", true);
 
                         if (MenuUI::OptionSettings("Enemy Chams", Config::enemyChams)) {
                             chamCombo("Visible Material",
@@ -1394,6 +1496,11 @@ void Menu::render() {
                     ImGui::PopID();
                 }
             } else if (visSub == 1) {
+                // The world card also needs to fit the taller sticker-style rows.
+                const float fit = (std::min)(1.f, ImGui::GetContentRegionAvail().y / (690.f * dpi));
+                ImGui::PushFont(nullptr, ImGui::GetFontSize() * fit);
+                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.f * dpi * fit, 3.f * dpi * fit));
+                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(6.f * dpi * fit, 7.f * dpi * fit));
                 // ?"??"? World: 2 columns, all cards AutoResizeY (no bottom strip scroll) ?"??"?
                 const ImGuiColorEditFlags worldCol = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_AlphaBar;
 
@@ -1466,10 +1573,8 @@ void Menu::render() {
                 }
 
                 ImGui::Spacing();
-                ui::SectionLabel("Items");
-                UiText::TextDisabled("Right-click to bind. Use the gear for settings.");
+                MenuUI::Section("Items", true);
 
-                ui::SectionLabel("Utility Footprints");
                 ui::FeatureToggle("Smoke Footprint",
                                   &Config::smoke_range,
                                   "Actual smoke spread projected onto terrain; updates every 16 ticks.");
@@ -1529,7 +1634,7 @@ void Menu::render() {
                 }
 
                 ImGui::Spacing();
-                ui::SectionLabel("Item Chams");
+                MenuUI::Section("Item Chams", true);
                 UiText::TextDisabled("Dropped weapons and utility");
                 if (MenuUI::OptionSettings("Item Chams", Config::itemChams)) {
                     MenuUI::Checkbox("Pistol##chams_item", &Config::itemChamsPistol);
@@ -1597,7 +1702,7 @@ void Menu::render() {
                 }
 
                 ImGui::Spacing();
-                ui::SectionLabel("FX Tint");
+                MenuUI::Section("FX Tint", true);
                 UiText::TextDisabled("Particle / volume colors");
 
                 if (MenuUI::OptionSettings("Smoke Color", Config::smoke_color)) {
@@ -1633,7 +1738,7 @@ void Menu::render() {
                     ImGui::EndPopup();
                 }
 
-                ui::SectionLabel("World / FX");
+                MenuUI::Section("World / FX", true);
                 UiText::TextDisabled("Turn off visual clutter");
 
                 ui::SliderFull("Flash Reduce", "##flash_reduce", &Config::antiflash_amount, 0.f, 100.f, "%.0f%%");
@@ -1653,6 +1758,8 @@ void Menu::render() {
                 MenuUI::Checkbox("Visual Recoil", &Config::remove_recoil);
 
                 ui::EndCard();
+                ImGui::PopStyleVar(2);
+                ImGui::PopFont();
             } else if (visSub == 2) {
                 // Grenade Lineup Helper
                 ui::BeginCard("##nade_left", half, true);
@@ -1822,6 +1929,11 @@ void Menu::render() {
 
         case 4: // Misc
         {
+            // Keep the full movement / match card visible with the roomier controls.
+            const float fit = (std::min)(1.f, ImGui::GetContentRegionAvail().y / (730.f * dpi));
+            ImGui::PushFont(nullptr, ImGui::GetFontSize() * fit);
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.f * dpi * fit, 3.f * dpi * fit));
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(6.f * dpi * fit, 7.f * dpi * fit));
             // Assist - auto pistol
             // Match - auto accept / vote reveal
             ImGui::BeginGroup();
@@ -2037,6 +2149,7 @@ void Menu::render() {
             ui::BeginCard("##misc_widgets", 0, true);
             ui::SectionLabel("HUD & Widgets");
             MenuUI::Checkbox("Keybind List", &Config::widget_keybinds);
+            MenuUI::Checkbox("Func List", &Config::widget_funclist);
             if (MenuUI::OptionSettings("Bomb Info", Config::widget_bomb)) {
                 MenuUI::Checkbox("Auto Defuse", &Config::auto_defuse);
 
@@ -2051,6 +2164,8 @@ void Menu::render() {
             MenuUI::Checkbox("Radar Reveal", &Config::radar_reveal);
             ui::EndCard();
             ImGui::EndGroup();
+            ImGui::PopStyleVar(2);
+            ImGui::PopFont();
         } break;
 
         case 5: // Config
@@ -2298,6 +2413,7 @@ void Menu::render() {
     MenuUI::DrawWindowFrame(ImGui::GetWindowDrawList(), wpos, ImVec2(wpos.x + wsize.x, wpos.y + wsize.y), round);
 
     MenuUI::DrawPageFlip();
+    MenuUI::DrawEffects();
     ImGui::End();
     ImGui::PopFont();
     ImGui::PopStyleVar(2); // window alpha + rounding

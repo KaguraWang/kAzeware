@@ -315,18 +315,74 @@ namespace {
             dl->AddLine(screen[line[0]], screen[line[1]], edge, 1.f);
     }
 
-    void DrawImpactSparks(ImDrawList* dl, const ViewMatrix& vm, const Vector_t& pos, float alpha) {
-        Vector_t projected{};
-        if (!vm.WorldToScreen(pos, projected))
-            return;
-        const ImVec2 center(projected.x, projected.y);
-        const ImU32 color = ImpactColor(Config::bullet_impact_effect_color_spark, alpha);
-        const float outer = 5.f + (1.f - alpha) * 11.f;
-        for (int i = 0; i < 8; ++i) {
-            const float angle = static_cast<float>(i) * 0.785398163f;
-            const ImVec2 inner(center.x + std::cos(angle) * 2.f, center.y + std::sin(angle) * 2.f);
-            const ImVec2 end(center.x + std::cos(angle) * outer, center.y + std::sin(angle) * outer);
-            dl->AddLine(inner, end, color, 1.25f);
+    constexpr float kSparkLife = .9f, kSparkGravity = 650.f;
+
+    std::uint32_t SparkHash(std::uint32_t x) {
+        x ^= x >> 16;
+        x *= 0x7feb352dU;
+        x ^= x >> 15;
+        x *= 0x846ca68bU;
+        x ^= x >> 16;
+        return x;
+    }
+
+    float SparkRandom(std::uint32_t& state, float low, float high) {
+        state = SparkHash(state + 0x9e3779b9U);
+        return low + (high - low) * static_cast<float>(state >> 8) / static_cast<float>(1u << 24);
+    }
+
+    // Ballistic embers: each spark splashes back off the surface and falls under gravity until it burns out.
+    void DrawImpactSparks(ImDrawList* dl, const ViewMatrix& vm, const ImpactPt& impact, float age) {
+        const Vector_t& pos = impact.pos;
+        Vector_t back{0.f, 0.f, 1.f};
+        if (Bones::IsValidPos(impact.eye)) {
+            Vector_t d = impact.eye - pos;
+            const float length = std::sqrt(d.x * d.x + d.y * d.y + d.z * d.z);
+            if (length > 1.f)
+                back = Vector_t(d.x / length, d.y / length, d.z / length);
+        }
+        std::uint32_t bits = 0;
+        std::memcpy(&bits, &impact.time, sizeof(bits));
+        std::uint32_t seed = SparkHash(bits ^ static_cast<std::uint32_t>(static_cast<int>(pos.x * 8.f)) * 73856093U ^
+                                       static_cast<std::uint32_t>(static_cast<int>(pos.y * 8.f)) * 19349663U);
+        const ImVec4 tint = Config::bullet_impact_effect_color_spark;
+        auto at = [&](const Vector_t& v, float t) {
+            return Vector_t(pos.x + v.x * t, pos.y + v.y * t, pos.z + v.z * t - .5f * kSparkGravity * t * t);
+        };
+
+        if (age < .07f) {
+            Vector_t screen{};
+            if (vm.WorldToScreen(pos, screen)) {
+                const float k = 1.f - age / .07f;
+                dl->AddCircleFilled(ImVec2(screen.x, screen.y), 2.f + 4.f * k, ImpactColor(ImVec4(1.f, .95f, .8f, 1.f), .8f * k), 12);
+                dl->AddCircleFilled(ImVec2(screen.x, screen.y), 5.f + 7.f * k, ImpactColor(tint, .35f * k), 16);
+            }
+        }
+
+        for (int i = 0; i < 16; ++i) {
+            const float life = SparkRandom(seed, .4f, kSparkLife);
+            // Random direction in a cone around the bounce-back vector, with a little lift.
+            Vector_t dir(back.x + SparkRandom(seed, -.9f, .9f),
+                         back.y + SparkRandom(seed, -.9f, .9f),
+                         back.z + SparkRandom(seed, -.3f, .9f));
+            const float length = std::sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
+            const float speed = SparkRandom(seed, 90.f, 260.f);
+            if (length < .001f)
+                continue;
+            const Vector_t velocity(dir.x / length * speed, dir.y / length * speed, dir.z / length * speed);
+            if (age >= life)
+                continue;
+            const float t = age, k = t / life;
+            Vector_t head{}, tail{};
+            if (!vm.WorldToScreen(at(velocity, t), head) || !vm.WorldToScreen(at(velocity, (std::max)(0.f, t - .03f)), tail))
+                continue;
+            const float fade = 1.f - k * k;
+            const float width = 1.8f * (1.f - .6f * k);
+            // Hot white head cooling into the configured spark colour.
+            const ImVec4 hot(1.f + (tint.x - 1.f) * k, .95f + (tint.y - .95f) * k, .8f + (tint.z - .8f) * k, tint.w);
+            dl->AddLine(ImVec2(tail.x, tail.y), ImVec2(head.x, head.y), ImpactColor(tint, fade * .55f), width + 1.2f);
+            dl->AddLine(ImVec2(tail.x, tail.y), ImVec2(head.x, head.y), ImpactColor(hot, fade), width);
+            dl->AddCircleFilled(ImVec2(head.x, head.y), width * .7f, ImpactColor(hot, fade), 6);
         }
     }
 
@@ -387,7 +443,9 @@ namespace {
         const float tracerLife = (std::max)(Config::bullet_tracer_duration, 0.1f);
         const float tracerWidth = showTracers ? std::clamp(Config::bullet_tracer_thickness, 1.f, 8.f) : 0.f;
         const float tracerGlow = showTracers ? std::clamp(Config::bullet_tracer_glow_strength, 0.f, 2.f) : 0.f;
-        const float maxLife = (std::max)(showOverlay || showSparks ? impactLife : 0.f, showTracers ? tracerLife : 0.f);
+        const float maxLife = (std::max)({showOverlay ? impactLife : 0.f,
+                                          showSparks ? kSparkLife : 0.f,
+                                          showTracers ? tracerLife : 0.f});
         AcquireSRWLockExclusive(&g_impactLock);
         for (auto& impact : g_impacts) {
             if (!impact.valid)
@@ -413,14 +471,12 @@ namespace {
                 }
             }
 
-            if (age < impactLife) {
+            if (showOverlay && age < impactLife) {
                 const float progress = std::clamp(age / impactLife, 0.f, 1.f);
-                const float fade = 1.f - progress * progress;
-                if (showOverlay)
-                    DrawImpactCube(dl, vm, impact.pos, fade);
-                if (showSparks)
-                    DrawImpactSparks(dl, vm, impact.pos, fade);
+                DrawImpactCube(dl, vm, impact.pos, 1.f - progress * progress);
             }
+            if (showSparks && age < kSparkLife)
+                DrawImpactSparks(dl, vm, impact, age);
         }
         ReleaseSRWLockExclusive(&g_impactLock);
     }

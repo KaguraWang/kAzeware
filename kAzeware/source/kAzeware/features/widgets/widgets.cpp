@@ -1,4 +1,4 @@
-﻿#include "../../config/translated_ui.h"
+#include "../../config/translated_ui.h"
 #include "widgets.h"
 #include "../../menu/menu_ui.h"
 #include "steam_avatar.h"
@@ -22,7 +22,9 @@
 #include "../../../cs2/entity/C_BaseEntity/C_BaseEntity.h"
 #include "../sdk_prio_a/sdk_prio_a.h"
 #include "../ragebot/rage.h"
+#include "../ragebot/profiles.h"
 #include "../../../../external/imgui/imgui.h"
+#include "../../../../external/imgui/imgui_internal.h"
 
 #include <cstdio>
 #include <cmath>
@@ -41,7 +43,7 @@ namespace Widgets {
         }
 
         ImVec4 WidgetAccent(const ImVec4& custom) {
-            return Config::menu_widgets_follow ? Config::menu_accent : custom;
+            return Config::menu_widgets_follow ? MenuUI::Accent() : custom;
         }
 
         ImU32 ColU32(const ImVec4& c) {
@@ -61,74 +63,64 @@ namespace Widgets {
                           ((c >> IM_COL32_A_SHIFT) & 0xFF) / 255.f);
         }
 
+        // Memphis palette shared with the menu.
+        constexpr ImU32 kInk = IM_COL32(61, 41, 64, 255), kMuted = IM_COL32(143, 112, 135, 255),
+                        kCream = IM_COL32(255, 252, 250, 255), kPink = IM_COL32(255, 183, 203, 255),
+                        kHotPink = IM_COL32(238, 102, 150, 255), kLemon = IM_COL32(255, 228, 112, 255),
+                        kMint = IM_COL32(150, 226, 196, 255), kSky = IM_COL32(142, 202, 250, 255),
+                        kLilac = IM_COL32(198, 174, 242, 255), kMiku = IM_COL32(57, 197, 187, 255);
+
+        ImU32 Fade(ImU32 c, float alpha) {
+            const float a = float((c >> IM_COL32_A_SHIFT) & 255) * std::clamp(alpha, 0.f, 1.f);
+            return (c & ~IM_COL32_A_MASK) | (static_cast<ImU32>(a) << IM_COL32_A_SHIFT);
+        }
+
+        float Now() {
+            return static_cast<float>(ImGui::GetTime());
+        }
+
         void DrawTextShadow(ImDrawList* dl, ImFont* font, float sz, ImVec2 p, ImU32 col, const char* text) {
             if (!dl || !font || !text)
                 return;
             text = Lang::T(text);
-            dl->AddText(font, sz, ImVec2(p.x + 1.f, p.y + 1.f), IM_COL32(0, 0, 0, 140), text);
+            dl->AddText(font, sz, ImVec2(p.x + 1.f, p.y + 1.f), IM_COL32(255, 255, 255, 170), text);
             dl->AddText(font, sz, p, col, text);
         }
 
-        void DrawPanel(ImDrawList* dl, ImVec2 a, ImVec2 b, ImU32 accent, float alpha = 1.f) {
-            const float h = b.y - a.y;
-            const float r = (std::min)(PanelRounding(), h * 0.5f);
+        // Sticker panel: pastel paper, pink hard shadow, ink outline, dot grid, washi tape and a star.
+        void DrawPaperPanel(ImDrawList* dl, ImVec2 a, ImVec2 b, ImU32 paper, float alpha = 1.f, ImU32 tape = kLemon) {
             alpha = std::clamp(alpha, 0.f, 1.f);
-            auto A = [alpha](int v) {
-                return static_cast<int>(std::clamp(static_cast<float>(v) * alpha, 0.f, 255.f));
-            };
-
-            dl->AddRectFilled(ImVec2(a.x, a.y + 2.f), ImVec2(b.x, b.y + 3.f), IM_COL32(0, 0, 0, A(88)), r + 1.f);
-
-            ImVec4 fill = Config::menu_bg;
-            fill.w = std::clamp(Config::menu_opacity, 0.72f, 0.94f) * alpha;
-            dl->AddRectFilled(a, b, ColU32(fill), r);
-
-            const float glass = std::clamp(Config::menu_glass, 0.f, 1.f);
-            const float sheenH = std::clamp(h * 0.22f, 6.f, r + 4.f);
-            dl->PushClipRect(a, b, true);
-            dl->AddRectFilled(a,
-                              ImVec2(b.x, a.y + sheenH),
-                              IM_COL32(255, 255, 255, A(static_cast<int>(22.f * glass))),
-                              r,
-                              ImDrawFlags_RoundCornersTop);
+            const float r = 7.f;
+            dl->PushClipRect(ImVec2(a.x - 10.f, a.y - 12.f), ImVec2(b.x + 12.f, b.y + 8.f), false);
+            dl->AddRectFilled(ImVec2(a.x + 4.f, a.y + 4.f), ImVec2(b.x + 4.f, b.y + 4.f), Fade(IM_COL32(236, 128, 166, 170), alpha), r);
+            dl->AddRectFilled(a, b, Fade(paper, alpha), r);
+            dl->PushClipRect(ImVec2(a.x + 2.f, a.y + 2.f), ImVec2(b.x - 2.f, b.y - 2.f), true);
+            for (float y = a.y + 7.f; y < b.y; y += 12.f)
+                for (float x = a.x + (fmodf((y - a.y) / 12.f, 2.f) < 1.f ? 7.f : 13.f); x < b.x; x += 12.f)
+                    dl->AddCircleFilled(ImVec2(x, y), 1.f, Fade(IM_COL32(255, 255, 255, 150), alpha), 6);
             dl->PopClipRect();
+            dl->AddRect(a, b, Fade(kInk, alpha), r, 0, 2.f);
 
-            ImVec4 border = Config::menu_border;
-            border.w = std::clamp(border.w, 0.10f, 0.20f) * alpha;
-            dl->AddRect(a, b, ColU32(border), r, 0, 1.f);
-            dl->AddRect(a, b, IM_COL32(255, 255, 255, A(static_cast<int>(20.f * glass))), r, 0, 1.f);
-
-            const float inset = (std::max)(r, 5.f);
-            ImVec4 ac = U32ToVec4(accent);
-            ac.w = 0.95f * alpha;
-            dl->AddRectFilled(ImVec2(a.x + inset, a.y + 1.f), ImVec2(b.x - inset, a.y + 3.f), ColU32(ac), 1.f);
-        }
-
-        void DrawPaperPanel(ImDrawList* dl, ImVec2 a, ImVec2 b, ImU32 paper, float alpha = 1.f) {
-            const int opacity = static_cast<int>(255.f * std::clamp(alpha, 0.f, 1.f));
-            const ImU32 ink = IM_COL32(29, 27, 35, opacity);
-            const ImU32 fill = (paper & ~IM_COL32_A_MASK) | (static_cast<ImU32>(opacity) << IM_COL32_A_SHIFT);
-            dl->PushClipRect(a, ImVec2(b.x + 5.f, b.y + 5.f), false);
-            dl->AddRectFilled(ImVec2(a.x + 4.f, a.y + 4.f), ImVec2(b.x + 4.f, b.y + 4.f), ink, 2.f);
-            dl->PopClipRect();
-            dl->AddRectFilled(a, b, fill, 2.f);
-            dl->AddRect(a, b, ink, 2.f, 0, 2.f);
-
-            const ImVec2 t0(b.x - 28.f, a.y - 7.f), t1(b.x + 3.f, a.y + 5.f);
-            const ImVec2 t2(b.x, a.y + 12.f), t3(b.x - 31.f, a.y);
-            dl->PushClipRect(ImVec2(a.x, a.y - 8.f), ImVec2(b.x + 5.f, b.y + 5.f), false);
-            dl->AddQuadFilled(t0, t1, t2, t3, IM_COL32(255, 247, 205, static_cast<int>(110.f * alpha)));
-            dl->AddQuad(t0, t1, t2, t3, IM_COL32(150, 134, 96, static_cast<int>(90.f * alpha)), 1.f);
-            dl->AddLine(ImVec2(t0.x + 3.f, t0.y + 2.f),
-                        ImVec2(t1.x - 3.f, t1.y + 2.f),
-                        IM_COL32(255, 255, 244, static_cast<int>(120.f * alpha)),
-                        1.f);
+            const float s = sinf(-.45f), c = cosf(-.45f);
+            const ImVec2 tc(a.x + 16.f, a.y + 1.f);
+            ImVec2 q[4] = {{-15.f, -5.f}, {15.f, -5.f}, {15.f, 5.f}, {-15.f, 5.f}};
+            for (auto& p : q)
+                p = ImVec2(tc.x + p.x * c - p.y * s, tc.y + p.x * s + p.y * c);
+            dl->AddQuadFilled(q[0], q[1], q[2], q[3], Fade((tape & ~IM_COL32_A_MASK) | (205u << IM_COL32_A_SHIFT), alpha));
+            for (int i = 1; i < 5; i++) {
+                const float t = i / 5.f;
+                dl->AddLine(ImVec2(q[0].x + (q[1].x - q[0].x) * t, q[0].y + (q[1].y - q[0].y) * t),
+                            ImVec2(q[3].x + (q[2].x - q[3].x) * t, q[3].y + (q[2].y - q[3].y) * t),
+                            Fade(IM_COL32(255, 255, 255, 110), alpha),
+                            1.5f);
+            }
+            MenuUI::DrawStar(dl, ImVec2(b.x - 1.f, a.y + 1.f), 5.f, Now() * .8f, Fade(kLemon, alpha), Fade(kInk, alpha));
             dl->PopClipRect();
         }
 
         void DrawHeaderSep(ImDrawList* dl, ImVec2 a, ImVec2 b, float padX, float y, float alpha = 1.f) {
-            const int a8 = static_cast<int>(18.f * std::clamp(alpha, 0.f, 1.f));
-            dl->AddRectFilled(ImVec2(a.x + padX, y), ImVec2(b.x - padX, y + 1.f), IM_COL32(255, 255, 255, a8));
+            for (float x = a.x + padX; x < b.x - padX; x += 6.f)
+                dl->AddCircleFilled(ImVec2(x, y), 1.1f, Fade(kHotPink, .75f * alpha), 6);
         }
 
         constexpr ImGuiColorEditFlags kWidgetColFlags = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel |
@@ -155,36 +147,33 @@ namespace Widgets {
                 ImGui::OpenPopup(id);
         }
 
-        bool BeginWidgetPopup(const char* id, const char* title, ImU32 accent, float width = 196.f) {
+        bool BeginWidgetPopup(const char* id, const char* title, ImU32, float width = 196.f) {
             const float r = PanelRounding();
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10.f, 8.f));
             ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, r);
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.f);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 2.f);
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(6.f, 5.f));
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.f, 3.f));
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 2.f);
             ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, r);
-            ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 1.f);
+            ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 2.f);
 
-            const ImVec4 accentV = U32ToVec4(accent);
-            ImVec4 popupBg = Config::menu_child_bg;
-            popupBg.w = std::clamp(Config::menu_opacity + 0.06f, 0.80f, 0.96f);
-            ImGui::PushStyleColor(ImGuiCol_PopupBg, popupBg);
-            ImGui::PushStyleColor(ImGuiCol_Border, Config::menu_border);
-            ImGui::PushStyleColor(ImGuiCol_Text, Config::menu_text);
-            ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(1.f, 1.f, 1.f, 0.07f));
-            ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.f, 0.f, 0.f, 0.28f));
-            ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(accentV.x, accentV.y, accentV.z, 0.12f));
-            ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(accentV.x, accentV.y, accentV.z, 0.18f));
-            ImGui::PushStyleColor(ImGuiCol_CheckMark, accentV);
-            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(accentV.x, accentV.y, accentV.z, 0.12f));
-            ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(accentV.x, accentV.y, accentV.z, 0.18f));
-            ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(accentV.x, accentV.y, accentV.z, 0.24f));
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.f, 1.f, 1.f, 0.04f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.f, 1.f, 1.f, 0.08f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.f, 1.f, 1.f, 0.12f));
-            ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(1.f, .9f, 0, 1));
-            ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(1.f, .9f, 0, 1));
+            ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4(1.f, .94f, .96f, 1.f));
+            ImGui::PushStyleColor(ImGuiCol_Border, MenuUI::TextBright());
+            ImGui::PushStyleColor(ImGuiCol_Text, MenuUI::TextBright());
+            ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(.93f, .55f, .70f, .5f));
+            ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(1.f, .99f, .99f, 1.f));
+            ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(1.f, .86f, .92f, 1.f));
+            ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(1.f, .92f, .6f, 1.f));
+            ImGui::PushStyleColor(ImGuiCol_CheckMark, MenuUI::Accent());
+            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(1.f, .76f, .84f, 1.f));
+            ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(1.f, .89f, .93f, 1.f));
+            ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(.59f, .89f, .77f, 1.f));
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.f, .72f, .80f, 1.f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.f, .89f, .44f, 1.f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(.59f, .89f, .77f, 1.f));
+            ImGui::PushStyleColor(ImGuiCol_SliderGrab, MenuUI::Accent());
+            ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, MenuUI::Accent());
 
             ImGui::SetNextWindowSizeConstraints(ImVec2(width, 0.f), ImVec2(width, 480.f));
             if (!ImGui::BeginPopup(id, ImGuiWindowFlags_AlwaysAutoResize)) {
@@ -216,36 +205,29 @@ namespace Widgets {
             return UiText::Button("Reset position", ImVec2(w, 0.f));
         }
 
-        void DrawProgressBar(ImDrawList* dl, ImVec2 a, ImVec2 b, float t, ImU32 fill, ImU32 bg) {
+        // Striped pill bar shared by the bomb fuse, defuse and DT charge.
+        void DrawPillBar(ImDrawList* dl, ImVec2 a, ImVec2 b, float t, ImU32 fill, float alpha = 1.f) {
             t = std::clamp(t, 0.f, 1.f);
-            const float r = 1.5f;
-            dl->AddRectFilled(a, b, bg, r);
-            if (t > 0.01f) {
-                const ImVec2 f(a.x + (b.x - a.x) * t, b.y);
-                dl->AddRectFilled(a, f, fill, r);
-                dl->AddRectFilledMultiColor(a,
-                                            ImVec2(f.x, a.y + (b.y - a.y) * 0.45f),
-                                            IM_COL32(255, 255, 255, 36),
-                                            IM_COL32(255, 255, 255, 36),
-                                            IM_COL32(255, 255, 255, 0),
-                                            IM_COL32(255, 255, 255, 0));
+            const float h = b.y - a.y, r = h * .5f;
+            dl->AddRectFilled(ImVec2(a.x + 1.5f, a.y + 1.5f), ImVec2(b.x + 1.5f, b.y + 1.5f), Fade(kInk, alpha), r);
+            dl->AddRectFilled(a, b, Fade(kCream, alpha), r);
+            if (t > .01f) {
+                const float x = a.x + (b.x - a.x) * t;
+                dl->PushClipRect(a, ImVec2(x, b.y), true);
+                dl->AddRectFilled(a, b, Fade(fill, alpha), r);
+                for (float s = a.x - h; s < x; s += 7.f)
+                    dl->AddLine(ImVec2(s, b.y), ImVec2(s + h, a.y), Fade(IM_COL32(255, 255, 255, 110), alpha), 2.f);
+                dl->PopClipRect();
             }
+            dl->AddRect(a, b, Fade(kInk, alpha), r, 0, 1.3f);
+        }
+
+        void DrawProgressBar(ImDrawList* dl, ImVec2 a, ImVec2 b, float t, ImU32 fill, ImU32) {
+            DrawPillBar(dl, a, b, t, fill);
         }
 
         void DrawFuseBar(ImDrawList* dl, ImVec2 a, ImVec2 b, float t, ImU32 fill) {
-            t = std::clamp(t, 0.f, 1.f);
-            const float r = 2.f;
-            dl->AddRectFilled(a, b, IM_COL32(255, 255, 255, 16), r);
-            if (t <= 0.01f)
-                return;
-            const ImVec2 f(a.x + (b.x - a.x) * t, b.y);
-            dl->AddRectFilled(a, f, fill, r);
-            dl->AddRectFilledMultiColor(a,
-                                        ImVec2(f.x, a.y + (b.y - a.y) * 0.45f),
-                                        IM_COL32(255, 255, 255, 40),
-                                        IM_COL32(255, 255, 255, 40),
-                                        IM_COL32(255, 255, 255, 0),
-                                        IM_COL32(255, 255, 255, 0));
+            DrawPillBar(dl, a, b, t, fill);
         }
 
         void DrawBombGlyph(ImDrawList* dl, ImVec2 c, float r, ImU32 col) {
@@ -254,31 +236,32 @@ namespace Widgets {
             dl->AddCircleFilled(ImVec2(c.x + r * 0.60f, c.y - r * 0.96f), r * 0.12f, col, 8);
         }
 
-        void DrawSiteBadge(ImDrawList* dl, ImVec2 a, float w, float h, char site, ImU32 accent, bool idle) {
+        void DrawSiteBadge(ImDrawList* dl, ImVec2 a, float w, float h, char site, ImU32, bool idle) {
             const ImVec2 b(a.x + w, a.y + h);
-            const float r = 4.f;
-            ImVec4 av = U32ToVec4(accent);
-            av.w = idle ? 0.16f : 0.28f;
-            dl->AddRectFilled(a, b, ColU32(av), r);
-            dl->AddRect(a, b, accent, r, 0, 1.f);
+            const float r = 6.f;
+            dl->AddRectFilled(ImVec2(a.x + 2.f, a.y + 2.f), ImVec2(b.x + 2.f, b.y + 2.f), kInk, r);
+            dl->AddRectFilled(a, b, idle ? kCream : kPink, r);
+            dl->AddRect(a, b, kInk, r, 0, 1.5f);
 
             WeaponIconDraw::EnsureReady(pDevice);
             const float iconH = h * 0.72f;
+            const ImU32 icon = idle ? kMuted : kInk;
             const float drawn =
-                WeaponIconDraw::DrawCentered(dl, a.x + w * 0.5f, a.y + (h - iconH) * 0.5f, accent, "c4", iconH);
+                WeaponIconDraw::DrawCentered(dl, a.x + w * 0.5f, a.y + (h - iconH) * 0.5f, icon, "c4", iconH);
             if (drawn <= 0.f)
-                DrawBombGlyph(dl, ImVec2(a.x + w * 0.5f, a.y + h * 0.54f), h * 0.32f, accent);
+                DrawBombGlyph(dl, ImVec2(a.x + w * 0.5f, a.y + h * 0.54f), h * 0.32f, icon);
 
             if (site != 'A' && site != 'B')
                 return;
             char letter[2] = {site, '\0'};
             ImFont* font = ImGui::GetFont();
-            const float px = 16.f;
+            const float px = 15.f;
             const ImVec2 ts = font->CalcTextSizeA(px, 9999.f, 0.f, letter);
-            const ImVec2 lp(b.x - ts.x - 2.f, b.y - ts.y + 1.f);
-            dl->AddRectFilled(ImVec2(lp.x - 3.f, lp.y + 1.f), ImVec2(b.x, b.y), IM_COL32(0, 0, 0, 170), 2.f);
-            dl->AddText(font, px, ImVec2(lp.x + 1.f, lp.y + 1.f), IM_COL32(0, 0, 0, 140), letter);
-            dl->AddText(font, px, lp, IM_COL32(250, 251, 253, 250), letter);
+            const ImVec2 c(b.x - 2.f, b.y - 2.f);
+            const float rr = (std::max)(ts.x, ts.y) * .62f;
+            dl->AddCircleFilled(c, rr, kLemon, 20);
+            dl->AddCircle(c, rr, kInk, 20, 1.5f);
+            dl->AddText(font, px, ImVec2(c.x - ts.x * .5f, c.y - ts.y * .5f), kInk, letter);
         }
 
         const char* ModeTagShort(int mode) {
@@ -567,8 +550,11 @@ namespace Widgets {
 
                 const float titleX = a.x + padX;
                 const float titleY = a.y + padY;
-                dl->AddText(
-                    ImVec2(titleX, titleY), ColU32A(ImVec4(0.31f, 0.29f, 0.33f, 1.f), 0.90f * pv), Lang::T("Keybinds"));
+                dl->AddText(g_MenuHeadingFont ? g_MenuHeadingFont : ImGui::GetFont(),
+                            ImGui::GetFontSize(),
+                            ImVec2(titleX, titleY),
+                            ColU32A(MenuUI::TextBright(), pv),
+                            Lang::T("Keybinds"));
 
                 int activeN = 0;
                 for (int i = 0; i < s_animN; ++i)
@@ -579,7 +565,7 @@ namespace Widgets {
                     std::snprintf(badge, sizeof(badge), "%d", activeN);
                     const ImVec2 bsz = ImGui::CalcTextSize(badge);
                     dl->AddText(
-                        ImVec2(b.x - padX - bsz.x, titleY), ColU32A(ImVec4(0.12f, 0.11f, 0.14f, 1.f), pv), badge);
+                        ImVec2(b.x - padX - bsz.x, titleY), ColU32A(MenuUI::TextBright(), pv), badge);
                 }
 
                 DrawHeaderSep(dl, a, b, padX, a.y + padY + headerH, pv);
@@ -600,15 +586,15 @@ namespace Widgets {
 
                     dl->PushClipRect(ImVec2(a.x + padX, y), ImVec2(b.x - padX, y + hRow + 0.5f), true);
 
-                    if (lit > 0.02f) {
-                        dl->AddRectFilled(ImVec2(a.x + 3.f, y + 3.f),
-                                          ImVec2(a.x + 5.f, y + hRow - 3.f),
+                    if (lit > 0.02f)
+                        MenuUI::DrawHeart(dl,
+                                          ImVec2(a.x + padX + 4.f, y + hRow * .5f),
+                                          5.f * lit,
                                           ColU32A(WidgetAccent(Config::widget_keybinds_accent), lit * aMul),
-                                          1.f);
-                    }
+                                          Fade(kInk, lit * aMul));
 
-                    const ImU32 nameOff = ColU32A(ImVec4(0.31f, 0.29f, 0.33f, 1.f), 0.85f * aMul);
-                    const ImU32 nameOn = ColU32A(ImVec4(0.12f, 0.11f, 0.14f, 1.f), aMul);
+                    const ImU32 nameOff = ColU32A(MenuUI::TextMuted(), 0.85f * aMul);
+                    const ImU32 nameOn = ColU32A(MenuUI::TextBright(), aMul);
                     const ImU32 nameCol = MixU32(nameOff, nameOn, lit);
 
                     char nameBuf[64];
@@ -694,12 +680,12 @@ namespace Widgets {
                 const ImVec2 a = ImGui::GetWindowPos();
                 const ImVec2 b(a.x + panelW, a.y + panelH);
 
-                // Menu UI accent (Config::menu_accent). Urgent / defused override only.
-                const ImU32 menuAccent = ColU32(Config::menu_accent);
-                const ImU32 accent = !live ? ColU32A(Config::menu_accent, 0.55f)
+                // Menu theme accent. Urgent / defused override only.
+                const ImU32 menuAccent = ColU32(MenuUI::Accent());
+                const ImU32 accent = !live ? ColU32A(MenuUI::Accent(), 0.55f)
                                            : (defused ? IM_COL32(80, 200, 120, 230)
                                                       : (urgent ? ColU32(Config::widget_bomb_urgent) : menuAccent));
-                DrawPaperPanel(dl, a, b, IM_COL32(255, 239, 191, 255));
+                DrawPaperPanel(dl, a, b, IM_COL32(255, 243, 196, 255), 1.f, kSky);
 
                 const char siteCh = live ? ((bomb.site == 0) ? 'A' : (bomb.site == 1) ? 'B' : '?') : '?';
                 const ImVec2 badgeA(a.x + padX + 2.f, a.y + padY);
@@ -719,7 +705,7 @@ namespace Widgets {
                     std::snprintf(status, sizeof(status), "Detonating");
                 else
                     std::snprintf(status, sizeof(status), "Bomb");
-                const ImU32 statusCol = live ? accent : ColU32(ImVec4(0.12f, 0.11f, 0.14f, 1.f));
+                const ImU32 statusCol = live ? accent : ColU32(MenuUI::TextBright());
                 DrawTextShadow(dl, font, 13.f, ImVec2(bodyX, a.y + padY + 1.f), statusCol, status);
 
                 char timeBuf[16];
@@ -732,10 +718,10 @@ namespace Widgets {
 
                 const float timePx = 22.f;
                 const ImVec2 tsz = font->CalcTextSizeA(timePx, 9999.f, 0.f, timeBuf);
-                const ImU32 timeCol = !live ? ColU32(ImVec4(0.12f, 0.11f, 0.14f, 1.f))
+                const ImU32 timeCol = !live ? ColU32(MenuUI::TextBright())
                                             : (defused ? IM_COL32(80, 200, 120, 255)
                                                        : (urgent ? ColU32(Config::widget_bomb_urgent)
-                                                                 : ColU32(ImVec4(0.12f, 0.11f, 0.14f, 1.f))));
+                                                                 : ColU32(MenuUI::TextBright())));
                 DrawTextShadow(dl, font, timePx, ImVec2(bodyX, a.y + padY + 13.f), timeCol, timeBuf);
 
                 if (live) {
@@ -744,7 +730,7 @@ namespace Widgets {
                                    font,
                                    13.f,
                                    ImVec2(bodyX + tsz.x + 3.f, a.y + padY + 13.f + tsz.y - ssz.y - 2.f),
-                                   ColU32(ImVec4(0.12f, 0.11f, 0.14f, 1.f)),
+                                   ColU32(MenuUI::TextBright()),
                                    "s");
                 }
 
@@ -774,7 +760,7 @@ namespace Widgets {
                     const float defLeft = bomb.defuseLeft;
                     const float defT = (!defusing || defLeft < 0.f) ? 0.f : std::clamp(defLeft / defLen, 0.f, 1.f);
                     const bool canMake = defusing && defLeft >= 0.f && (blow < 0.f || defLeft <= blow + 0.05f);
-                    const ImU32 defCol = !defusing ? ColU32A(Config::menu_accent, 0.55f)
+                    const ImU32 defCol = !defusing ? ColU32A(MenuUI::Accent(), 0.55f)
                                                    : (canMake ? menuAccent : ColU32(Config::widget_bomb_urgent));
 
                     char defLine[24];
@@ -791,7 +777,7 @@ namespace Widgets {
                                    font,
                                    13.f,
                                    ImVec2(a.x + padX, y - 1.f),
-                                   ColU32(ImVec4(0.12f, 0.11f, 0.14f, 1.f)),
+                                   ColU32(MenuUI::TextBright()),
                                    "DEFUSE");
                     DrawTextShadow(dl, font, 14.f, ImVec2(b.x - padX - dsz.x, y - 1.f), defCol, defLine);
                     y += 16.f;
@@ -849,11 +835,11 @@ namespace Widgets {
                         std::snprintf(right, sizeof(right), "~%.0f", dmg);
 
                     const ImU32 dmgCol =
-                        !haveDmg ? ColU32(ImVec4(0.12f, 0.11f, 0.14f, 1.f))
+                        !haveDmg ? ColU32(MenuUI::TextBright())
                                  : (lethal ? ColU32(Config::widget_bomb_urgent)
-                                           : (dmg < 1.f ? menuAccent : ColU32(ImVec4(0.12f, 0.11f, 0.14f, 1.f))));
+                                           : (dmg < 1.f ? menuAccent : ColU32(MenuUI::TextBright())));
                     DrawTextShadow(
-                        dl, font, 13.f, ImVec2(a.x + padX, y), ColU32(ImVec4(0.12f, 0.11f, 0.14f, 1.f)), "DAMAGE");
+                        dl, font, 13.f, ImVec2(a.x + padX, y), ColU32(MenuUI::TextBright()), "DAMAGE");
                     const ImVec2 rsz = font->CalcTextSizeA(14.f, 9999.f, 0.f, right);
                     DrawTextShadow(dl, font, 14.f, ImVec2(b.x - padX - rsz.x, y), dmgCol, right);
                 }
@@ -1238,7 +1224,10 @@ namespace Widgets {
         }
 
         void DrawLetterAvatar(ImDrawList* dl, ImVec2 center, float radius, const char* name, ImU32 /*accent*/) {
-            dl->AddCircleFilled(center, radius, IM_COL32(36, 38, 44, 240), 12);
+            static constexpr ImU32 papers[] = {kPink, kLemon, kMint, kSky, kLilac};
+            const unsigned char first = name && name[0] ? static_cast<unsigned char>(name[0]) : 0;
+            dl->AddCircleFilled(center, radius, papers[first % 5], 16);
+            dl->AddCircle(center, radius, kInk, 16, 1.2f);
             char letter[2] = {'?', '\0'};
             if (name && name[0]) {
                 char c = name[0];
@@ -1247,9 +1236,7 @@ namespace Widgets {
                 letter[0] = c;
             }
             const ImVec2 ts = ImGui::CalcTextSize(letter);
-            dl->AddText(ImVec2(center.x - ts.x * 0.5f, center.y - ts.y * 0.5f),
-                        ColU32A(ImVec4(0.31f, 0.29f, 0.33f, 1.f), 0.95f),
-                        letter);
+            dl->AddText(ImVec2(center.x - ts.x * 0.5f, center.y - ts.y * 0.5f), kInk, letter);
         }
 
         void RenderSpectatorList(bool menuOpen) {
@@ -1320,8 +1307,11 @@ namespace Widgets {
 
                 const float titleX = a.x + padX;
                 const float titleY = a.y + padY;
-                dl->AddText(
-                    ImVec2(titleX, titleY), ColU32A(ImVec4(0.31f, 0.29f, 0.33f, 1.f), 0.90f), Lang::T("Spectators"));
+                dl->AddText(g_MenuHeadingFont ? g_MenuHeadingFont : ImGui::GetFont(),
+                            ImGui::GetFontSize(),
+                            ImVec2(titleX, titleY),
+                            ColU32(MenuUI::TextBright()),
+                            Lang::T("Spectators"));
 
                 {
                     char badge[16];
@@ -1331,8 +1321,8 @@ namespace Widgets {
                         std::snprintf(badge, sizeof(badge), "%d", total);
                     const ImVec2 bsz = ImGui::CalcTextSize(badge);
                     dl->AddText(ImVec2(b.x - padX - bsz.x, titleY),
-                                total > 0 ? ColU32(ImVec4(0.12f, 0.11f, 0.14f, 1.f))
-                                          : ColU32A(ImVec4(0.31f, 0.29f, 0.33f, 1.f), 0.70f),
+                                total > 0 ? ColU32(MenuUI::TextBright())
+                                          : ColU32A(MenuUI::TextMuted(), 0.70f),
                                 badge);
                 }
 
@@ -1341,7 +1331,7 @@ namespace Widgets {
                 float y = a.y + padY + headerH + 3.f;
                 if (n <= 0) {
                     dl->AddText(ImVec2(a.x + padX, y + (rowH - ImGui::GetFontSize()) * 0.5f),
-                                ColU32A(ImVec4(0.31f, 0.29f, 0.33f, 1.f), 0.70f),
+                                ColU32A(MenuUI::TextMuted(), 0.70f),
                                 Lang::T("None"));
                 } else {
                     for (int i = 0; i < n; ++i) {
@@ -1371,13 +1361,13 @@ namespace Widgets {
 
                         // Mode tag (1ST person POV vs 3RD person chase)
                         const char* modeStr = Lang::T((s.mode == kObsInEye) ? "1ST" : "3RD");
-                        const ImU32 modeCol =
-                            (s.mode == kObsInEye) ? IM_COL32(160, 210, 240, 230) : IM_COL32(200, 190, 230, 230);
                         const ImVec2 msz = ImGui::CalcTextSize(modeStr);
-                        const ImVec2 mMin(rowB.x - msz.x - 8.f, cy - msz.y * 0.5f - 1.f);
+                        const ImVec2 mMin(rowB.x - msz.x - 10.f, cy - msz.y * 0.5f - 1.f);
                         const ImVec2 mMax(rowB.x, cy + msz.y * 0.5f + 1.f);
-                        dl->AddRectFilled(mMin, mMax, IM_COL32(255, 255, 255, 18), 3.f);
-                        dl->AddText(ImVec2(mMin.x + 4.f, cy - msz.y * 0.5f), modeCol, modeStr);
+                        const float mr = (mMax.y - mMin.y) * .5f;
+                        dl->AddRectFilled(mMin, mMax, (s.mode == kObsInEye) ? kSky : kLilac, mr);
+                        dl->AddRect(mMin, mMax, kInk, mr, 0, 1.2f);
+                        dl->AddText(ImVec2(mMin.x + 5.f, cy - msz.y * 0.5f), kInk, modeStr);
 
                         const float maxNameW = (std::max)(24.f, mMin.x - 6.f - textX);
                         char clipped[64];
@@ -1385,7 +1375,7 @@ namespace Widgets {
                         ClipTextToWidth(clipped, sizeof(clipped), maxNameW);
                         const ImVec2 nsz = ImGui::CalcTextSize(clipped);
                         dl->AddText(
-                            ImVec2(textX, cy - nsz.y * 0.5f), ColU32(ImVec4(0.12f, 0.11f, 0.14f, 1.f)), clipped);
+                            ImVec2(textX, cy - nsz.y * 0.5f), ColU32(MenuUI::TextBright()), clipped);
 
                         y += rowH + rowGap;
                     }
@@ -1407,12 +1397,55 @@ namespace Widgets {
             ImGui::PopStyleVar(2);
         }
 
+        // Bubble lettering for the charged state: ink outline, offset shadow, a travelling wave and a pop-in.
+        void DrawReadyArt(ImDrawList* draw, ImVec2 right, float baseY, const char* text, float since) {
+            ImFont* font = g_MenuHeadingFont ? g_MenuHeadingFont : ImGui::GetFont();
+            const float t = Now();
+            const float pop = since < .45f ? 1.f + .45f * sinf(since / .45f * 3.14159f) * (1.f - since / .45f) : 1.f;
+            const float size = 20.f * pop;
+            const ImVec2 total = font->CalcTextSizeA(size, FLT_MAX, 0, text);
+            float x = right.x - total.x;
+            static constexpr ImU32 fills[] = {kMiku, kLemon, kMiku, kPink, kMiku, kCream};
+            int index = 0;
+            for (const char* p = text; *p;) {
+                unsigned int codepoint = 0;
+                const int bytes = ImTextCharFromUtf8(&codepoint, p, nullptr);
+                if (bytes <= 0)
+                    break;
+                char glyph[8]{};
+                std::memcpy(glyph, p, static_cast<size_t>((std::min)(bytes, 7)));
+                p += bytes;
+                const float w = font->CalcTextSizeA(size, FLT_MAX, 0, glyph).x;
+                const ImVec2 at(x, baseY - (size - 20.f) * .5f + sinf(t * 6.f - index * .8f) * 2.5f);
+                draw->AddText(font, size, ImVec2(at.x + 2.f, at.y + 2.f), kInk, glyph);
+                for (int dy = -1; dy <= 1; dy++)
+                    for (int dx = -1; dx <= 1; dx++)
+                        if (dx || dy)
+                            draw->AddText(font, size, ImVec2(at.x + dx * 1.5f, at.y + dy * 1.5f), kInk, glyph);
+                draw->AddText(font, size, at, fills[index % 6], glyph);
+                x += w;
+                ++index;
+            }
+            const float left = right.x - total.x, cy = baseY + size * .5f;
+            const ImVec2 sparks[] = {{left - 7.f, cy - 8.f}, {right.x + 4.f, cy - 10.f}, {right.x + 2.f, cy + 7.f}};
+            for (int i = 0; i < 3; ++i) {
+                const float twinkle = .5f + .5f * sinf(t * 5.f + i * 2.1f);
+                MenuUI::DrawStar(draw, sparks[i], 2.f + 3.f * twinkle, t * .6f + i, Fade(i == 1 ? kLemon : kCream, .4f + .6f * twinkle), Fade(kInk, .4f + .6f * twinkle));
+            }
+        }
+
         void RenderDoubleTap() {
             const auto status = Rage::GetDoubleTapStatus();
             if (!status.enabled)
                 return;
             const ImVec2 size{188.f, 58.f};
             static ImVec2 position{-1.f, -1.f};
+            static float readySince = -10.f;
+            static bool wasReady = false;
+            const bool ready = status.state == Rage::DoubleTapState::Ready;
+            if (ready && !wasReady)
+                readySince = Now();
+            wasReady = ready;
             const auto fallback =
                 ImVec2(ImGui::GetIO().DisplaySize.x * .5f - size.x * .5f, ImGui::GetIO().DisplaySize.y * .7f);
             ImGui::SetNextWindowPos(ResolvePos(position, size.x, size.y, fallback), ImGuiCond_Always);
@@ -1428,22 +1461,358 @@ namespace Widgets {
                 HandleWidgetDrag(position, size.x, size.y, g_bMenuOpen);
                 auto* draw = ImGui::GetWindowDrawList();
                 const auto at = ImGui::GetWindowPos();
-                const auto ink = IM_COL32(29, 27, 35, 255);
-                DrawPaperPanel(draw, at, ImVec2(at.x + size.x, at.y + size.y), IM_COL32(235, 226, 255, 255));
+                const ImU32 accent = ready ? kMiku : kHotPink;
+                DrawPaperPanel(draw,
+                               at,
+                               ImVec2(at.x + size.x, at.y + size.y),
+                               ready ? IM_COL32(205, 243, 239, 255) : IM_COL32(235, 226, 255, 255),
+                               1.f,
+                               ready ? kPink : kLemon);
+
+                ImFont* heading = g_MenuHeadingFont ? g_MenuHeadingFont : ImGui::GetFont();
+                const float fontSize = ImGui::GetFontSize();
+                const ImVec2 dt = heading->CalcTextSizeA(fontSize, FLT_MAX, 0, "DT");
+                const ImVec2 tagA(at.x + 10.f, at.y + 8.f), tagB(tagA.x + dt.x + 14.f, tagA.y + dt.y + 6.f);
+                const float tagR = (tagB.y - tagA.y) * .5f;
+                draw->AddRectFilled(ImVec2(tagA.x + 2.f, tagA.y + 2.f), ImVec2(tagB.x + 2.f, tagB.y + 2.f), kInk, tagR);
+                draw->AddRectFilled(tagA, tagB, ready ? kMiku : kPink, tagR);
+                draw->AddRect(tagA, tagB, kInk, tagR, 0, 1.5f);
+                draw->AddText(heading, fontSize, ImVec2(tagA.x + 7.f, tagA.y + 3.f), ready ? IM_COL32_WHITE : kInk, "DT");
+
                 const char* state = status.state == Rage::DoubleTapState::Ready        ? "Ready"
                                     : status.state == Rage::DoubleTapState::Charging   ? "Charging"
                                     : status.state == Rage::DoubleTapState::SecondShot ? "Second shot"
                                                                                        : "Waiting";
-                draw->AddText(ImVec2(at.x + 10.f, at.y + 8.f), ink, "DT");
                 const char* label = Lang::T(state);
-                const auto text = ImGui::CalcTextSize(label);
-                draw->AddText(ImVec2(at.x + size.x - 10.f - text.x, at.y + 8.f), IM_COL32(79, 74, 84, 255), label);
-                const ImVec2 a(at.x + 10.f, at.y + 35.f), b(at.x + size.x - 10.f, at.y + 47.f);
-                draw->AddRectFilled(a, b, IM_COL32(255, 252, 243, 255), 1.f);
+                if (ready)
+                    DrawReadyArt(draw, ImVec2(at.x + size.x - 14.f, 0.f), at.y + 7.f, label, Now() - readySince);
+                else {
+                    const auto text = ImGui::CalcTextSize(label);
+                    draw->AddText(ImVec2(at.x + size.x - 12.f - text.x, at.y + 10.f), kMuted, label);
+                }
+
+                const ImVec2 a(at.x + 12.f, at.y + 36.f), b(at.x + size.x - 14.f, at.y + 47.f);
                 const float progress = std::clamp(status.progress, 0.f, 1.f);
-                if (progress > 0.f)
-                    draw->AddRectFilled(a, ImVec2(a.x + (b.x - a.x) * progress, b.y), IM_COL32(255, 231, 87, 255), 1.f);
-                draw->AddRect(a, b, ink, 1.f, 0, 1.5f);
+                DrawPillBar(draw, a, b, ready ? 1.f : progress, accent);
+                const float tip = a.x + (b.x - a.x) * (ready ? 1.f : progress);
+                const ImVec2 knob(std::clamp(tip, a.x + 5.f, b.x - 5.f), (a.y + b.y) * .5f);
+                if (ready) {
+                    const float sweep = fmodf(Now() * 1.4f, 1.6f) - .3f;
+                    draw->PushClipRect(a, b, true);
+                    const float sx = a.x + (b.x - a.x) * sweep;
+                    draw->AddQuadFilled(ImVec2(sx, b.y), ImVec2(sx + 10.f, a.y), ImVec2(sx + 22.f, a.y), ImVec2(sx + 12.f, b.y), IM_COL32(255, 255, 255, 150));
+                    draw->PopClipRect();
+                    MenuUI::DrawStar(draw, knob, 8.f + sinf(Now() * 7.f), Now() * 2.f, kLemon, kInk);
+                } else if (progress > 0.f)
+                    MenuUI::DrawHeart(draw, knob, 7.f, kHotPink, kInk);
+            }
+            ImGui::End();
+            ImGui::PopStyleColor();
+            ImGui::PopStyleVar(2);
+        }
+
+        // Rotates, scales and fades everything drawn since `start` around `center`.
+        void TransformSince(ImDrawList* dl, int start, ImVec2 center, float angle, ImVec2 scale, float alpha) {
+            const float s = sinf(angle), c = cosf(angle);
+            for (int i = start; i < dl->VtxBuffer.Size; ++i) {
+                auto& v = dl->VtxBuffer[i];
+                const float x = (v.pos.x - center.x) * scale.x, y = (v.pos.y - center.y) * scale.y;
+                v.pos = ImVec2(center.x + x * c - y * s, center.y + x * s + y * c);
+                if (alpha < 1.f)
+                    v.col = Fade(v.col, alpha);
+            }
+        }
+
+        enum FuncId { kFuncHC, kFuncMD, kFuncMP, kFuncDT, kFuncJB, kFuncEB, kFuncCount };
+
+        struct FuncChip {
+            bool on = false;
+            float changed = -10.f;
+            float w = 0.f;
+            ImVec2 slot{}, eased{};
+            bool placed = false;
+        };
+
+        constexpr float kFlingIn = .36f, kSlap = .22f, kFlingOut = .42f;
+
+        float EaseOutBack(float t) {
+            const float c1 = 1.70158f, c3 = c1 + 1.f;
+            return 1.f + c3 * powf(t - 1.f, 3.f) + c1 * powf(t - 1.f, 2.f);
+        }
+
+        void RenderFuncList(bool menuOpen) {
+            if (!Config::widget_funclist)
+                return;
+            static FuncChip chips[kFuncCount];
+            static float readyAt = -10.f;
+            static bool wasReady = false;
+            static ImVec2 dragOffset{};
+            static constexpr const char* names[kFuncCount] = {"HC", "MD", "MP", "DT", "JB", "EB"};
+            static constexpr ImU32 papers[kFuncCount] = {kPink, kLemon, kMint, kLilac, kSky, IM_COL32(255, 205, 178, 255)};
+
+            const float now = Now();
+            const auto rage = Rage::Current();
+            const auto dt = Rage::GetDoubleTapStatus();
+            const bool ready = dt.enabled && dt.state == Rage::DoubleTapState::Ready;
+            if (ready && !wasReady)
+                readyAt = now;
+            wasReady = ready;
+
+            const bool active[kFuncCount] = {rage.enabled,
+                                             rage.enabled,
+                                             rage.enabled,
+                                             dt.enabled,
+                                             Config::movement.jumpbug,
+                                             Config::movement.edgebug};
+            char values[kFuncCount][16]{};
+            if (rage.hitchance > 0)
+                std::snprintf(values[kFuncHC], sizeof(values[kFuncHC]), "%d", rage.hitchance);
+            else
+                std::snprintf(values[kFuncHC], sizeof(values[kFuncHC]), "%s", Lang::T("Auto"));
+            std::snprintf(values[kFuncMD], sizeof(values[kFuncMD]), "%s", Lang::T(MenuUI::DamageLabel(rage.DamageValue(), true).c_str()));
+            if (rage.per_hitbox)
+                std::snprintf(values[kFuncMP], sizeof(values[kFuncMP]), "%s", Lang::T("Per"));
+            else if (rage.point_scale > 0.f)
+                std::snprintf(values[kFuncMP], sizeof(values[kFuncMP]), "%.0f", rage.point_scale);
+            else
+                std::snprintf(values[kFuncMP], sizeof(values[kFuncMP]), "%s", Lang::T("Auto"));
+
+            ImFont* heading = g_MenuHeadingFont ? g_MenuHeadingFont : ImGui::GetFont();
+            ImFont* body = ImGui::GetFont();
+            const float fontSize = ImGui::GetFontSize(), valueSize = fontSize * .85f;
+            const float chipH = 26.f, gap = 7.f, margin = 14.f, ring = 18.f;
+            const ImVec2 screen = ImGui::GetIO().DisplaySize;
+            const int edge = std::clamp(Config::widget_funclist_edge, 0, 3);
+            const bool vertical = edge < 2;
+
+            int count = 0;
+            float length = 0.f, thickness = chipH;
+            for (int i = 0; i < kFuncCount; ++i) {
+                auto& chip = chips[i];
+                if (active[i] != chip.on) {
+                    chip.on = active[i];
+                    chip.changed = now;
+                    if (chip.on)
+                        chip.placed = false;
+                }
+                if (!chip.on)
+                    continue;
+                float w = 18.f + heading->CalcTextSizeA(fontSize, FLT_MAX, 0, names[i]).x;
+                if (values[i][0])
+                    w += 6.f + body->CalcTextSizeA(valueSize, FLT_MAX, 0, values[i]).x + 12.f;
+                if (i == kFuncDT)
+                    w += 6.f + ring;
+                chip.w = w;
+                length += vertical ? chipH : w;
+                thickness = vertical ? (std::max)(thickness, w) : chipH;
+                ++count;
+            }
+            const bool placeholder = menuOpen && count == 0;
+            const char* placeholderText = Lang::T("Func List");
+            const float placeholderW = 20.f + heading->CalcTextSizeA(fontSize, FLT_MAX, 0, placeholderText).x;
+            if (placeholder) {
+                length = vertical ? chipH : placeholderW;
+                thickness = vertical ? placeholderW : chipH;
+            }
+            length += gap * (std::max)(0, (placeholder ? 1 : count) - 1);
+
+            // Anchor the stack on the snapped edge, centred at the saved fraction along it.
+            const float along = std::clamp(Config::widget_funclist_along, 0.f, 1.f) * (vertical ? screen.y : screen.x);
+            float start = std::clamp(along - length * .5f, margin, (std::max)(margin, (vertical ? screen.y : screen.x) - margin - length));
+            ImVec2 listMin = vertical ? ImVec2(edge == 0 ? margin : screen.x - margin - thickness, start)
+                                      : ImVec2(start, edge == 2 ? margin : screen.y - margin - thickness);
+            listMin.x += dragOffset.x;
+            listMin.y += dragOffset.y;
+            const ImVec2 listMax(listMin.x + (vertical ? thickness : length), listMin.y + (vertical ? length : thickness));
+            const ImVec2 outward = edge == 0 ? ImVec2(-1, 0) : edge == 1 ? ImVec2(1, 0) : edge == 2 ? ImVec2(0, -1) : ImVec2(0, 1);
+
+            float cursor = vertical ? listMin.y : listMin.x;
+            for (int i = 0; i < kFuncCount; ++i) {
+                auto& chip = chips[i];
+                if (!chip.on)
+                    continue;
+                chip.slot = vertical ? ImVec2(edge == 0 ? listMin.x : listMax.x - chip.w, cursor) : ImVec2(cursor, listMin.y);
+                cursor += (vertical ? chipH : chip.w) + gap;
+                if (!chip.placed) {
+                    chip.eased = chip.slot;
+                    chip.placed = true;
+                }
+                const float follow = dragOffset.x != 0.f || dragOffset.y != 0.f ? 1.f : (std::min)(1.f, ImGui::GetIO().DeltaTime * 12.f);
+                chip.eased.x += (chip.slot.x - chip.eased.x) * follow;
+                chip.eased.y += (chip.slot.y - chip.eased.y) * follow;
+            }
+
+            auto* dl = ImGui::GetBackgroundDrawList();
+            const float travel = (vertical ? listMax.x - listMin.x : listMax.y - listMin.y) + 140.f;
+            for (int i = 0; i < kFuncCount; ++i) {
+                auto& chip = chips[i];
+                const float since = now - chip.changed;
+                if (!chip.on && (since >= kFlingOut || !chip.placed))
+                    continue;
+                const ImVec2 rest = chip.eased;
+                const ImVec2 center0(rest.x + chip.w * .5f, rest.y + chipH * .5f);
+                const ImVec2 perp(-outward.y, outward.x);
+                ImVec2 center = center0, scale(1.f, 1.f);
+                float angle = 0.f, alpha = 1.f, impact = -1.f;
+                if (chip.on && since < kFlingIn) {
+                    // Fling: an arc from beyond the edge, spinning and oversized, settling with overshoot.
+                    const float t = since / kFlingIn, e = EaseOutBack(t), inv = 1.f - (std::min)(e, 1.2f);
+                    center = ImVec2(center0.x + outward.x * travel * inv + perp.x * 70.f * sinf(t * 3.14159f) * (1.f - t),
+                                    center0.y + outward.y * travel * inv + perp.y * 70.f * sinf(t * 3.14159f) * (1.f - t));
+                    angle = -1.1f * (1.f - e);
+                    scale = ImVec2(1.f + .3f * (1.f - t), 1.f + .3f * (1.f - t));
+                } else if (chip.on && since < kFlingIn + kSlap) {
+                    // Slap: squash against the edge, then spring back.
+                    const float u = (since - kFlingIn) / kSlap, k = sinf(u * 3.14159f) * (1.f - u);
+                    scale = vertical ? ImVec2(1.f - .22f * k, 1.f + .18f * k) : ImVec2(1.f + .18f * k, 1.f - .22f * k);
+                    center = ImVec2(center0.x + outward.x * 3.f * k, center0.y + outward.y * 3.f * k);
+                    impact = u;
+                } else if (!chip.on) {
+                    // Lift off the edge, then fling back out.
+                    const float t = since / kFlingOut;
+                    if (t < .3f) {
+                        const float k = t / .3f;
+                        scale = ImVec2(1.f + .12f * k, 1.f + .12f * k);
+                        angle = .12f * k;
+                        center = ImVec2(center0.x - outward.x * 6.f * k, center0.y - outward.y * 6.f * k);
+                    } else {
+                        const float k = (t - .3f) / .7f, e = k * k;
+                        scale = ImVec2(1.12f - .2f * k, 1.12f - .2f * k);
+                        angle = .12f + 1.6f * e;
+                        center = ImVec2(center0.x + outward.x * travel * e - perp.x * 50.f * e,
+                                        center0.y + outward.y * travel * e - perp.y * 50.f * e);
+                        alpha = 1.f - k * k;
+                    }
+                }
+
+                const ImVec2 a(center.x - chip.w * .5f, center.y - chipH * .5f), b(a.x + chip.w, a.y + chipH);
+                const float r = chipH * .5f;
+                const bool dtReady = i == kFuncDT && ready;
+                const int first = dl->VtxBuffer.Size;
+                dl->AddRectFilled(ImVec2(a.x + 3.f, a.y + 3.f), ImVec2(b.x + 3.f, b.y + 3.f), IM_COL32(236, 128, 166, 170), r);
+                dl->AddRectFilled(a, b, dtReady ? IM_COL32(205, 243, 239, 255) : papers[i], r);
+                dl->AddRect(a, b, kInk, r, 0, 1.8f);
+
+                float x = a.x + 9.f;
+                const ImVec2 abbr = heading->CalcTextSizeA(fontSize, FLT_MAX, 0, names[i]);
+                ImU32 abbrCol = kInk;
+                if (dtReady && fmodf(now * 3.f, 1.f) < .5f)
+                    abbrCol = kMiku;
+                if (dtReady)
+                    dl->AddText(heading, fontSize, ImVec2(x + 1.f, center.y - abbr.y * .5f + 1.f), Fade(kInk, .35f), names[i]);
+                dl->AddText(heading, fontSize, ImVec2(x, center.y - abbr.y * .5f), abbrCol, names[i]);
+                x += abbr.x + 6.f;
+
+                if (values[i][0]) {
+                    const ImVec2 vs = body->CalcTextSizeA(valueSize, FLT_MAX, 0, values[i]);
+                    const ImVec2 va(x, center.y - vs.y * .5f - 2.f), vb(x + vs.x + 12.f, center.y + vs.y * .5f + 2.f);
+                    dl->AddRectFilled(va, vb, kCream, (vb.y - va.y) * .5f);
+                    dl->AddRect(va, vb, kInk, (vb.y - va.y) * .5f, 0, 1.f);
+                    dl->AddText(body, valueSize, ImVec2(va.x + 6.f, center.y - vs.y * .5f), kInk, values[i]);
+                    x = vb.x + 6.f;
+                }
+
+                if (i == kFuncDT) {
+                    const ImVec2 rc(x + ring * .5f, center.y);
+                    const float rr = ring * .5f - 1.f;
+                    dl->AddCircleFilled(rc, rr, kCream, 24);
+                    const float progress = ready ? 1.f : std::clamp(dt.progress, 0.f, 1.f);
+                    if (progress > 0.f) {
+                        dl->PathArcTo(rc, rr - 2.f, -1.5708f, -1.5708f + 6.2832f * progress, 28);
+                        dl->PathStroke(ready ? kMiku : kHotPink, ImDrawFlags_None, 3.5f);
+                    }
+                    dl->AddCircle(rc, rr, kInk, 24, 1.3f);
+                    if (ready) {
+                        dl->AddCircleFilled(rc, 2.2f, kMiku, 10);
+                        const float burst = now - readyAt;
+                        if (burst < .7f) {
+                            const float k = burst / .7f;
+                            dl->AddCircle(rc, rr + 16.f * k, Fade(kMiku, 1.f - k), 28, 2.5f * (1.f - k) + .5f);
+                            for (int s = 0; s < 4; ++s) {
+                                const float ang = s * 1.5708f + .785f;
+                                MenuUI::DrawStar(dl,
+                                                 ImVec2(rc.x + cosf(ang) * (rr + 12.f * k), rc.y + sinf(ang) * (rr + 12.f * k)),
+                                                 3.5f * (1.f - k) + 1.f,
+                                                 now * 3.f,
+                                                 Fade(kLemon, 1.f - k),
+                                                 Fade(kInk, 1.f - k));
+                            }
+                        } else {
+                            const float pulse = fmodf(burst - .7f, 1.4f) / 1.4f;
+                            dl->AddCircle(rc, rr + 6.f * pulse, Fade(kMiku, .6f * (1.f - pulse)), 24, 1.5f);
+                        }
+                    }
+                }
+                TransformSince(dl, first, center, angle, scale, alpha);
+
+                if (impact >= 0.f && impact < 1.f) {
+                    // Slap marks burst from the screen-facing side, so they stay visible next to the edge.
+                    const float k = impact, fade = 1.f - k;
+                    const float half = (vertical ? chip.w : chipH) * .5f;
+                    const ImVec2 hit(center0.x - outward.x * half, center0.y - outward.y * half);
+                    for (int s = -1; s <= 1; ++s) {
+                        const float ang = atan2f(-outward.y, -outward.x) + s * .7f;
+                        const ImVec2 dir(cosf(ang), sinf(ang));
+                        const float r0 = 5.f + 10.f * k, r1 = r0 + 7.f;
+                        dl->AddLine(ImVec2(hit.x + dir.x * r0, hit.y + dir.y * r0),
+                                    ImVec2(hit.x + dir.x * r1, hit.y + dir.y * r1),
+                                    Fade(kInk, fade),
+                                    2.f);
+                    }
+                    MenuUI::DrawStar(dl, ImVec2(hit.x - perp.x * 14.f * k, hit.y - perp.y * 14.f * k), 4.f * fade + 1.f, now * 4.f, Fade(kLemon, fade), Fade(kInk, fade));
+                    MenuUI::DrawHeart(dl, ImVec2(hit.x + perp.x * 14.f * k, hit.y + perp.y * 14.f * k), 4.f * fade + 1.f, Fade(kHotPink, fade), Fade(kInk, fade));
+                }
+            }
+
+            if (placeholder) {
+                const ImVec2 a(vertical && edge == 1 ? listMax.x - placeholderW : listMin.x, listMin.y), b(a.x + placeholderW, a.y + chipH);
+                const float r = chipH * .5f;
+                dl->AddRectFilled(a, b, Fade(kCream, .85f), r);
+                for (float x = a.x + r; x < b.x - r; x += 8.f) {
+                    dl->AddLine(ImVec2(x, a.y), ImVec2(x + 4.f, a.y), kMuted, 1.5f);
+                    dl->AddLine(ImVec2(x, b.y), ImVec2(x + 4.f, b.y), kMuted, 1.5f);
+                }
+                dl->PathArcTo(ImVec2(a.x + r, a.y + r), r, 1.5708f, 4.7124f, 12);
+                dl->PathStroke(kMuted, ImDrawFlags_None, 1.5f);
+                dl->PathArcTo(ImVec2(b.x - r, a.y + r), r, -1.5708f, 1.5708f, 12);
+                dl->PathStroke(kMuted, ImDrawFlags_None, 1.5f);
+                const ImVec2 ts = heading->CalcTextSizeA(fontSize, FLT_MAX, 0, placeholderText);
+                dl->AddText(heading, fontSize, ImVec2(a.x + 10.f, a.y + (chipH - ts.y) * .5f), kMuted, placeholderText);
+            }
+
+            if (!menuOpen || (count == 0 && !placeholder)) {
+                dragOffset = {};
+                return;
+            }
+            // Drag handle over the settled list; on release the list snaps to the nearest edge.
+            ImGui::SetNextWindowPos(listMin, ImGuiCond_Always);
+            ImGui::SetNextWindowSize(ImVec2(listMax.x - listMin.x, listMax.y - listMin.y), ImGuiCond_Always);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.f);
+            ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0));
+            const auto flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoNav |
+                               ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoMove |
+                               ImGuiWindowFlags_NoBringToFrontOnFocus;
+            if (ImGui::Begin("##widget_funclist", nullptr, flags)) {
+                ImGui::InvisibleButton("##funclist_hit", ImVec2(listMax.x - listMin.x, listMax.y - listMin.y));
+                if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left, 2.f))
+                    dragOffset = ImGui::GetMouseDragDelta(ImGuiMouseButton_Left, 2.f);
+                if (ImGui::IsItemDeactivated() && (dragOffset.x != 0.f || dragOffset.y != 0.f)) {
+                    const ImVec2 c((listMin.x + listMax.x) * .5f, (listMin.y + listMax.y) * .5f);
+                    const float distance[4] = {c.x, screen.x - c.x, c.y, screen.y - c.y};
+                    int nearest = 0;
+                    for (int e = 1; e < 4; ++e)
+                        if (distance[e] < distance[nearest])
+                            nearest = e;
+                    Config::widget_funclist_edge = nearest;
+                    Config::widget_funclist_along =
+                        std::clamp(nearest < 2 ? c.y / (std::max)(1.f, screen.y) : c.x / (std::max)(1.f, screen.x), .03f, .97f);
+                    dragOffset = {};
+                }
+                if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                    Config::widget_funclist_edge = 0;
+                    Config::widget_funclist_along = .5f;
+                }
             }
             ImGui::End();
             ImGui::PopStyleColor();
@@ -1461,6 +1830,11 @@ namespace Widgets {
             RenderKeybindList(menuOpen);
         } __except (EXCEPTION_EXECUTE_HANDLER) {
             Con::Seh("Widget.keybinds", GetExceptionCode());
+        }
+        __try {
+            RenderFuncList(menuOpen);
+        } __except (EXCEPTION_EXECUTE_HANDLER) {
+            Con::Seh("Widget.funclist", GetExceptionCode());
         }
         __try {
             RenderBombWidget(menuOpen);

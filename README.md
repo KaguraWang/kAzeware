@@ -2,16 +2,18 @@
 
 **有全部功能的 CS2 HvH 菜单**
 
-[下载版本](https://github.com/KaguraWang/kAzeware/releases) · [浏览源码](kAzeware/source) · [Apache 2.0](LICENSE)
+[下载 alpha-0.0.2](https://github.com/KaguraWang/kAzeware/releases/tag/alpha-0.0.2) · [浏览源码](kAzeware/source) · [Apache 2.0](LICENSE)
 
-![kAzeware 实机总预览](docs/images/overview.png)
+![kAzeware alpha-0.0.2 实机总预览](docs/images/overview.png)
+
+淡粉色孟菲斯拼贴界面：贴纸卡片、和纸胶带、爱心控件和滑动胶囊导航。常用设置直接铺开，细节放进齿轮弹窗；菜单与屏幕 widgets 使用统一的视觉风格。
 
 ## 功能一览
 
 | 页面 | 内容 |
 | --- | --- |
 | Rage | 目标选择、伤害与命中率、多点、穿墙、DT、急停 / 开镜与 Anti-Aim |
-| Legit | FOV、平滑、目标部位、瞄准曲线、Triggerbot、RCS 与 Semi-rage |
+| Legit | 武器配置侧栏、FOV、平滑、Accuracy、瞄准曲线、Triggerbot、RCS 与 Semi-rage |
 | Visuals | 玩家 ESP、Chams、镜头与命中反馈、世界效果、投掷物轨迹和点位管理 |
 | Skins | 枪械、刀、手套和人物模型浏览与配置 |
 | Misc | 移动辅助、Peek、近战辅助、投掷控制与 HUD widgets |
@@ -28,18 +30,27 @@
 
 ![Rage 页面：配置侧栏、Accuracy、Aimbot 与 Anti-Aim](docs/images/rage.png)
 
+<details>
+<summary>查看配置添加与逐部位 Multipoint</summary>
+
+![Rage — 搜索添加武器或组，手持武器置顶](docs/images/rage-config-add.png)
+
+![Rage — MP per hitbox 与八个部位比例](docs/images/rage-multipoint.png)
+
+</details>
+
 ## Legit
 
-从 FOV 和平滑到目标部位、瞄准曲线、扳机与后坐力控制，按用途分成五个子页面。支持单独的武器参数及条件检查。
+左侧配置栏支持 Global、武器组和单把武器覆盖，通过“+”搜索添加，手持武器置顶；右键确认移除。四个子页面分别管理 Aim、Accuracy、Humanization 和 Trigger / RCS，Semi-rage 已整合到 Accuracy。平滑和 RCS 的常用选项直接显示。
 
 ![Legit — Aim：FOV 与平滑](docs/images/legit.png)
 
 <details>
-<summary>查看 Targets、Humanization、Trigger / RCS、Semi-rage</summary>
+<summary>查看 Accuracy、Humanization、Trigger / RCS 与配置添加</summary>
 
-**Targets：目标部位、优先级与瞄准可视化。**
+**Accuracy：目标部位、多点、优先级、瞄准预览与 Semi-rage。**
 
-![Legit — Targets](docs/images/legit-targets.png)
+![Legit — Accuracy](docs/images/legit-accuracy.png)
 
 **Humanization：曲线、速度变化、反应延迟与微调。**
 
@@ -49,9 +60,9 @@
 
 ![Legit — Trigger / RCS](docs/images/legit-trigger-rcs.png)
 
-**Semi-rage：Seed Trigger、预测急停与预测开镜。**
+**配置添加：搜索武器 / 组，手持武器位于列表顶部。**
 
-![Legit — Semi-rage](docs/images/legit-semi-rage.png)
+![Legit — 配置添加](docs/images/legit-config-add.png)
 
 </details>
 
@@ -107,9 +118,16 @@
 
 ## Misc
 
-移动、近战、投掷控制和信息 widgets 集中管理。包含 Bhop、Autostrafe、Quick Peek、Duck Peek、刀 / 电击枪辅助，以及按键列表、炸弹信息和观战列表。Quick Peek 可选择是否仅等待同一目标的 DT 第二发。
+移动、近战、投掷控制和信息 widgets 集中管理。包含 Bhop、Autostrafe、Quick Peek、Duck Peek、刀 / 电击枪辅助，以及按键列表、Func List、炸弹信息和观战列表。Func List 汇总当前 HC / MD / MP、DT 充能与生效的跳跃辅助，可拖动并吸附屏幕边缘；DT 充满时以薄荷色提示。Quick Peek 可选择是否仅等待同一目标的 DT 第二发。
 
 ![Misc：移动、近战、投掷与 HUD](docs/images/misc.png)
+
+<details>
+<summary>查看游戏中的 Func List</summary>
+
+![Func List：屏幕边缘显示当前 HC、MD、MP](docs/images/widgets.png)
+
+</details>
 
 ## Config
 
@@ -151,6 +169,21 @@ DLL 输出 `bin/x64/Release/kAzeware.dll`；解决方案另含可选加载器。
 </details>
 
 ## 版本公告
+
+### alpha-0.0.2 · 2026-11-13
+
+[下载此版本](https://github.com/KaguraWang/kAzeware/releases/tag/alpha-0.0.2)
+
+- 菜单与 widgets 全面改为淡粉色孟菲斯拼贴风格，更新卡片、控件、导航、粒子与 DT Ready 动效。
+- Legit 改为可搜索的武器配置侧栏与四个子页面；Semi-rage 并入 Accuracy，覆盖参数稀疏保存，移除覆盖时清理绑定。
+- 新增可拖动、贴边的 Func List；子弹火花改为带重力的弹道火星。
+- 修正侧键 Toggle 抖动和输入重复计数；45ms 消抖仅作用于鼠标侧键，保留键盘快速连按。
+- 统一窗口回调的安装 / 恢复方式，修正 Misc、World 在默认尺寸下的底部裁切。
+- 菜单及 DLL 属性统一为 `alpha-0.0.2`，全部 16 个主、子页面与配置弹窗重新实机截图。
+
+Release x64 构建、输入回归、压缩配置保存 / 加载和页面截图检查通过。五 BOT、约 52ms 延迟的可比本地场景未观察到新增显著帧耗时；这不代表完整实战功能已验收。本版已在本机加载，等待用户验收。
+
+DLL SHA-256：`bd3490c50f9ff4a745b5f3bba861bd56ab7ccee4b6482492191159cd7f1fb1e4`
 
 ### 源码授权更新 · 2026-11-12
 

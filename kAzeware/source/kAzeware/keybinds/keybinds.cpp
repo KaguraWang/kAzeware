@@ -408,6 +408,7 @@ void Keybinds::initialize() {
     registerValue("hitsound", Config::hitsound);
     registerValue("widget_keybinds", Config::widget_keybinds);
     registerValue("widget_bomb", Config::widget_bomb);
+    registerValue("widget_funclist", Config::widget_funclist);
     registerValue("widget_spectators", Config::widget_spectators);
     registerValue("remove_hud", Config::remove_hud);
     registerValue("remove_radar", Config::remove_radar);
@@ -614,6 +615,16 @@ BindingTarget* Keybinds::find(const std::string& id) {
     return it == targets_.end() ? nullptr : &it->second;
 }
 
+void Keybinds::clearPrefix(const std::string& prefix) {
+    initialize();
+    for (auto it = targets_.lower_bound(prefix); it != targets_.end() && it->first.starts_with(prefix); ++it) {
+        auto& target = it->second;
+        target.bindings.clear();
+        target.overriding = false;
+        target.base = target.applied = target.read();
+    }
+}
+
 void Keybinds::apply(BindingTarget& target) {
     const KeyBinding* winner = nullptr;
     for (const auto& binding : target.bindings)
@@ -633,10 +644,17 @@ void Keybinds::reconcile() {
             continue;
         if (!target.resolve())
             continue;
+        // Leaving the active profile releases Hold bindings only. A Toggle keeps its state: it
+        // stays applied to its own profile, so switching weapons or dying never clears it.
         if (target.eligible && !target.eligible() && target.overriding) {
+            bool released = false;
             for (auto& binding : target.bindings)
-                binding.active = false;
-            apply(target);
+                if (binding.mode == KeyMode::Hold && binding.active) {
+                    binding.active = false;
+                    released = true;
+                }
+            if (released)
+                apply(target);
         }
         const auto current = Read(target);
         if (!target.overriding)
@@ -689,11 +707,31 @@ void Keybinds::removeBinding(const std::string& id, std::uint64_t binding) {
     }
 }
 
-void Keybinds::processKeyEvent(int key, bool down, bool allowActivation) {
+static double InputClockMs() {
+    static const double scale = [] {
+        LARGE_INTEGER frequency{};
+        QueryPerformanceFrequency(&frequency);
+        return 1000.0 / static_cast<double>(frequency.QuadPart);
+    }();
+    LARGE_INTEGER counter{};
+    QueryPerformanceCounter(&counter);
+    return static_cast<double>(counter.QuadPart) * scale;
+}
+
+// Mouse side-button switches chatter: one press can report release+press a few ms apart.
+constexpr double kToggleDebounceMs = 45.0;
+
+void Keybinds::processKeyEvent(int key, bool down, bool allowActivation, double time) {
     initialize();
     if (key <= 0 || key >= 256 || down_[key] == down)
         return;
     down_[key] = down;
+    if (time < 0.0)
+        time = InputClockMs();
+    const bool sideButton = key == VK_XBUTTON1 || key == VK_XBUTTON2;
+    const bool bounce = down && sideButton && releasedAt_[key] > 0.0 && time - releasedAt_[key] < kToggleDebounceMs;
+    if (!down)
+        releasedAt_[key] = time;
     for (auto& [id, target] : targets_)
         for (auto& binding : target.bindings) {
             if (binding.key != key)
@@ -702,7 +740,7 @@ void Keybinds::processKeyEvent(int key, bool down, bool allowActivation) {
             if (binding.mode == KeyMode::Hold) {
                 activate = down && allowActivation && (!target.eligible || target.eligible());
                 deactivate = !down;
-            } else if (down && allowActivation && (!target.eligible || target.eligible())) {
+            } else if (down && !bounce && allowActivation && (!target.eligible || target.eligible())) {
                 activate = !binding.active;
                 deactivate = binding.active;
             }
@@ -742,22 +780,23 @@ void Keybinds::onWindowMessage(unsigned msg, std::uintptr_t wParam, std::intptr_
         if (flags & (RI_MOUSE_BUTTON_5_DOWN | RI_MOUSE_BUTTON_5_UP))
             rawKeys_[VK_XBUTTON2] = true;
         if (flags & RI_MOUSE_BUTTON_4_DOWN)
-            events_.push_back({VK_XBUTTON1, true, true});
+            events_.push_back({VK_XBUTTON1, true, true, false, InputClockMs()});
         if (flags & RI_MOUSE_BUTTON_4_UP)
-            events_.push_back({VK_XBUTTON1, false, true});
+            events_.push_back({VK_XBUTTON1, false, true, false, InputClockMs()});
         if (flags & RI_MOUSE_BUTTON_5_DOWN)
-            events_.push_back({VK_XBUTTON2, true, true});
+            events_.push_back({VK_XBUTTON2, true, true, false, InputClockMs()});
         if (flags & RI_MOUSE_BUTTON_5_UP)
-            events_.push_back({VK_XBUTTON2, false, true});
+            events_.push_back({VK_XBUTTON2, false, true, false, InputClockMs()});
         return;
     }
     int key = 0;
-    bool down = false;
+    bool down = false, repeat = false;
     switch (msg) {
     case WM_KEYDOWN:
     case WM_SYSKEYDOWN:
         key = static_cast<int>(wParam);
         down = true;
+        repeat = (lParam & (1LL << 30)) != 0;
         break;
     case WM_KEYUP:
     case WM_SYSKEYUP:
@@ -802,7 +841,24 @@ void Keybinds::onWindowMessage(unsigned msg, std::uintptr_t wParam, std::intptr_
         return;
     std::lock_guard lock(eventsMutex_);
     if (!rawKeys_[key])
-        events_.push_back({key, down});
+        events_.push_back({key, down, false, repeat, InputClockMs()});
+}
+
+// Polling can see a transition before its delayed window message arrives. That message
+// must not count as a second press, or a Toggle binding flips straight back.
+bool Keybinds::consumePolledEdge(const KeyEvent& event, std::uint64_t now) {
+    auto& edges = polled_[event.key];
+    std::erase_if(edges, [&](const PolledEdge& edge) {
+        return now - edge.tick > 500;
+    });
+    if (edges.empty())
+        return false;
+    if (edges.front().down == event.down) {
+        edges.erase(edges.begin());
+        return true;
+    }
+    edges.clear();
+    return false;
 }
 
 void Keybinds::pollInputs(bool menuOpen) {
@@ -819,6 +875,11 @@ void Keybinds::pollInputs(bool menuOpen) {
     // pairs. State-only deduplication cannot distinguish them from two clicks.
     std::erase_if(events, [&](const KeyEvent& event) {
         return rawKeys[event.key] && !event.raw;
+    });
+    // Auto-repeat is never a new press; delayed messages for edges polling already handled are dropped.
+    const std::uint64_t now = GetTickCount64();
+    std::erase_if(events, [&](const KeyEvent& event) {
+        return event.repeat || (!event.raw && consumePolledEdge(event, now));
     });
     std::array<bool, 256> watched{};
     if (isListening())
@@ -850,7 +911,7 @@ void Keybinds::pollInputs(bool menuOpen) {
         received[event.key] = true;
         if (event.down && !down_[event.key])
             pressed.push_back(event.key);
-        processKeyEvent(event.key, event.down, allow);
+        processKeyEvent(event.key, event.down, allow, event.time);
     }
     // A queued transition is newer than the preceding frame's key state.
     // Do not synthesize another edge for that key in the same input batch.
@@ -858,6 +919,10 @@ void Keybinds::pollInputs(bool menuOpen) {
         if (!rawKeys[i] && !received[i] && physical[i] != down_[i]) {
             if (physical[i])
                 pressed.push_back(i);
+            auto& edges = polled_[i];
+            if (edges.size() >= 4)
+                edges.erase(edges.begin());
+            edges.push_back({physical[i], now});
             processKeyEvent(i, physical[i], allow);
         }
     // A raw-input window may not receive button-up after losing focus.
@@ -1188,7 +1253,7 @@ int Keybinds::listSnapshots(KeybindSnapshot* out, int maxOut) const {
             row.name = target.label.c_str();
             row.key = binding.key;
             row.mode = static_cast<int>(binding.mode);
-            row.active = binding.active;
+            row.active = binding.active && (!target.eligible || target.eligible());
             row.enabled = true;
             if (target.kind == BindKind::Float)
                 row.value = std::get<float>(binding.value);

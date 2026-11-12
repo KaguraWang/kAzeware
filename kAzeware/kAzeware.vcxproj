@@ -408,6 +408,7 @@
     <ClInclude Include="source\kAzeware\kAzeware.h" />
     <ClInclude Include="source\includes.h" />
     <ClInclude Include="source\kAzeware\menu\menu.h" />
+    <ClInclude Include="source\kAzeware\menu\control_look.h" />
     <ClInclude Include="source\kAzeware\menu\menu_ui.h" />
     <ClInclude Include="source\kAzeware\features\visuals\visuals.h" />
     <ClInclude Include="source\kAzeware\features\visuals\weapon_icon_draw.h" />

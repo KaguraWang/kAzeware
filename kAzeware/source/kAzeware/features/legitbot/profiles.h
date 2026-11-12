@@ -12,6 +12,7 @@ namespace LegitProfiles {
     bool Override(int index);
     bool Initialized(int index);
     void SetOverride(int index, bool enabled);
+    void Remove(int index);
     void SetLoaded(int index, bool enabled, bool initialized);
     int ActiveIndex();
     int HeldWeaponIndex();

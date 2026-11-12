@@ -1,4 +1,4 @@
-#include "config.h"
+﻿#include "config.h"
 #include "../features/skinchanger/skinchanger.h"
 #include "../features/world/skybox.h"
 #include "../keybinds/keybinds.h"
@@ -319,6 +319,9 @@ namespace Config {
     bool widget_keybinds = false;
     bool widget_bomb = false;
     bool widget_spectators = false;
+    bool widget_funclist = false;
+    int widget_funclist_edge = 0;
+    float widget_funclist_along = .5f;
     ImVec2 widget_keybinds_pos = ImVec2(-1.f, -1.f);
     ImVec2 widget_bomb_pos = ImVec2(-1.f, -1.f);
     ImVec2 widget_spectators_pos = ImVec2(-1.f, -1.f);
@@ -603,6 +606,9 @@ namespace Config {
         widget_keybinds = false;
         widget_bomb = false;
         widget_spectators = false;
+        widget_funclist = false;
+        widget_funclist_edge = 0;
+        widget_funclist_along = .5f;
         widget_keybinds_pos = ImVec2(-1.f, -1.f);
         widget_bomb_pos = ImVec2(-1.f, -1.f);
         widget_spectators_pos = ImVec2(-1.f, -1.f);
