@@ -64,3 +64,8 @@ _inject_tool/
 /.codex/
 __pycache__/
 *.py[cod]
+
+# Local agent instructions and handoff documents (not uploaded)
+AGENTS.md
+HANDOFF.md
+/docs/HISTORY.md

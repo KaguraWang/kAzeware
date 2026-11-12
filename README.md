@@ -2,7 +2,7 @@
 
 Windows x64、C++23、Direct3D 11 / ImGui 项目，包含 Rage、Legit、视觉、换肤、移动辅助、投掷物预测、配置和翻译系统。
 
-当前版本 **alpha-0.0.1**（2026-11-12）。开发前阅读 [AGENTS.md](AGENTS.md) 与 [HANDOFF.md](HANDOFF.md)。[历史记录](docs/HISTORY.md) 保留旧构建的验证边界。
+当前版本 **alpha-0.0.1**（2026-11-12）。工程入口、构建说明与当前验证范围见下文。
 
 ## 本版变化
 
@@ -19,7 +19,7 @@ Windows x64、C++23、Direct3D 11 / ImGui 项目，包含 Rage、Legit、视觉�
 - Extrapolation 控制射击外推，量为 0–8 ticks；Movement extrapolation 独立控制急停、开镜和 Visualise Peek 的敌人外推。继续检验 MD、HC、穿墙和目标优先级。
 - CS2 1.41.9.7 / build 14197 已核对当前地址和关键签名；参考 dump 不等于后续游戏版本兼容保证。此前 R8 专属预热优化仍保持回滚。
 - alpha-0.0.1 已构建并加载至本地 `-insecure` 对局，完成配置继承 / 保存、菜单操作、回撤碰撞和有限实测。可比五 BOT 场景中，平均帧耗时从 3.816ms 到 3.908ms，P95 从 5.216ms 到 5.292ms，未观察到新增显著开销。
-- **本版等待用户验收。** 当前测试不等于所有武器、网络环境或全部页面通过；AA 非 180° 服务器朝向、Visualise 和其他历史未验收项见 [HANDOFF.md](HANDOFF.md)。
+- **本版等待用户验收。** 当前测试不等于所有武器、网络环境或全部页面通过；AA 非 180° 服务器朝向、Visualise 和其他历史未验收项仍需独立验收。
 
 ## 下载与目录
 
@@ -40,9 +40,7 @@ loader/                     可选加载器工程
 translations/               英文 / 简体中文 .kt1 包
 dumper/output/              游戏 SDK 参考快照
 tools/audit_cs2_current.py   当前地址 / 签名审计
-docs/HISTORY.md             历史构建记录
 README.md                   工程入口
-HANDOFF.md                  当前改动、验证与限制
 ```
 
 `bin/`、`obj/` 是本地构建输出；个人参数、缓存、诊断工具和测试记录不纳入源码仓库。DLL 通过 Release 分发。
@@ -72,6 +70,8 @@ python tools/audit_cs2_current.py --game-dir 'D:\SteamLibrary\steamapps\common\C
 
 ## 维护
 
-遵守根目录 `.clang-format` 与 AGENTS.md。第三方依赖、参考 dump、内嵌资源头不做机械格式重排。每次功能变化同步更新 README.md / HANDOFF.md；构建通过、有限实测、已加载待验收和用户验收通过必须分别记录。测试专用探针及入口不得进入正式源码和 DLL。
+遵守根目录 `.clang-format`。第三方依赖、参考 dump、内嵌资源头不做机械格式重排。每次功能变化同步更新公开 README 和本地交接记录；构建通过、有限实测、已加载待验收和用户验收通过必须分别记录。测试专用探针及入口不得进入正式源码和 DLL。
+
+`AGENTS.md`、`HANDOFF.md` 及本地交接历史副本只在工作区维护，不纳入后续源码上传或 Release 打包。
 
 保留 [MIT 授权及上游版权](LICENSE)；第三方依赖沿用各自许可证。
