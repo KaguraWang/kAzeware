@@ -2,7 +2,7 @@
 
 Windows x64、C++23、Direct3D 11 / ImGui 项目，包含 Rage、Legit、视觉、换肤、移动辅助、投掷物预测、配置和翻译系统。
 
-当前版本 **alpha-0.0.1**（2026-11-12）。开发前阅读 [AGENTS.md](AGENTS.md) 与 [HANDOFF.md](HANDOFF.md)。[历史记录](docs/HISTORY.md) 保留旧构建的验证边界。
+当前版本 **alpha-0.0.1**（2026-11-12）。[历史记录](docs/HISTORY.md) 保留旧构建的验证边界。
 
 ## 本版变化
 
