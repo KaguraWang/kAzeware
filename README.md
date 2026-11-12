@@ -162,7 +162,7 @@ DLL 输出 `bin/x64/Release/kAzeware.dll`；解决方案另含可选加载器。
 
 ## 版本公告
 
-### alpha-0.0.2 · 2026-11-13
+### alpha-0.0.2 · 2026-11-13 · modest
 
 [下载此版本](https://github.com/KaguraWang/kAzeware/releases/tag/alpha-0.0.2)
 
@@ -184,6 +184,7 @@ DLL SHA-256：`bd3490c50f9ff4a745b5f3bba861bd56ab7ccee4b6482492191159cd7f1fb1e4`
 ### alpha-0.0.1 · 2026-11-12
 
 [下载此版本](https://github.com/KaguraWang/kAzeware/releases/tag/alpha-0.0.1)
+（为什么你要这么做呢
 
 - Rage 改为 Config 侧栏 + Accuracy + 全局 Aimbot / Anti-Aim；支持搜索新增武器或组，手持武器置顶、右键确认移除。
 - Hitboxes / Multipoint 移入 Accuracy；MP 齿轮常驻，保留逐部位比例；HC 齿轮仅 Auto 时显示。
