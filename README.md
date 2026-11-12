@@ -1,53 +1,143 @@
 # kAzeware
 
-Windows x64、C++23、Direct3D 11 / ImGui 项目，包含 Rage、Legit、视觉、换肤、移动辅助、投掷物预测、配置和翻译系统。
+**有全部功能的 CS2 HvH 菜单**
 
-当前版本 **alpha-0.0.1**（2026-11-12）。工程入口、构建说明与当前验证范围见下文。
+[下载版本](https://github.com/KaguraWang/kAzeware/releases) · [浏览源码](kAzeware/source) · [MIT License](LICENSE)
 
-## 本版变化
+![kAzeware 实机总预览](docs/images/overview.png)
 
-- Rage 改为左侧 Config、中间 Accuracy、右侧 Rage Aimbot / Anti-Aim。`+` 搜索并添加武器或武器组；手持武器置顶；右键确认移除覆盖项，Global 永久保留。侧栏依次显示 Global、组、武器。
-- 只有 Accuracy 按武器或组覆盖，优先级为武器 → 组 → Global。Rage Aimbot 和 Anti-Aim 全武器共用 Global；旧配置的 Accuracy 继续读取，旧子配置的 Aim / AA 数值不再生效。
-- Hitboxes 和 Multipoint 位于 Accuracy。**MP 齿轮常驻**，包含 `MP per hitbox` 和八个部位的比例；使用 Auto 时显示自动 MP 策略。HC 齿轮仅在 HC=Auto 时显示。
-- Quick Peek 默认保留等待 DT 第二发的策略。齿轮中可开启 `Only wait for same-target DT`：只为同一目标的第二发等待；不符合时按原回撤触发条件开始回拉，并保持回撤优先级。
-- Quick Peek 通过既有玩家碰撞、台阶和地面支撑计算处理斜面 / 楼梯，回撤速度考虑高差；去掉了高差超过 72u 就取消的限制。
-- 菜单标志右侧与 DLL 文件版本统一显示 `alpha-0.0.1`。
+## 功能一览
 
-## 保留能力与验证状态
+| 页面 | 内容 |
+| --- | --- |
+| Rage | 目标选择、伤害与命中率、多点、穿墙、DT、急停 / 开镜与 Anti-Aim |
+| Legit | FOV、平滑、目标部位、瞄准曲线、Triggerbot、RCS 与 Semi-rage |
+| Visuals | 玩家 ESP、Chams、镜头与命中反馈、世界效果、投掷物轨迹和点位管理 |
+| Skins | 枪械、刀、手套和人物模型浏览与配置 |
+| Misc | 移动辅助、Peek、近战辅助、投掷控制与 HUD widgets |
+| Config | 参数保存 / 加载、压缩、界面样式与翻译包 |
 
-- MD=0 为 Auto：DT 开启且真实就绪时采用候选敌人半血（向上取整），否则完整血量。HC=0、MP=0 均为 Auto；HC=0 不再隐式启用 NS，MP=0 不再关闭多点。自动策略提供均衡 / 可靠性 / 时机。
-- Extrapolation 控制射击外推，量为 0–8 ticks；Movement extrapolation 独立控制急停、开镜和 Visualise Peek 的敌人外推。继续检验 MD、HC、穿墙和目标优先级。
-- CS2 1.41.9.7 / build 14197 已核对当前地址和关键签名；参考 dump 不等于后续游戏版本兼容保证。此前 R8 专属预热优化仍保持回滚。
-- alpha-0.0.1 已构建并加载至本地 `-insecure` 对局，完成配置继承 / 保存、菜单操作、回撤碰撞和有限实测。可比五 BOT 场景中，平均帧耗时从 3.816ms 到 3.908ms，P95 从 5.216ms 到 5.292ms，未观察到新增显著开销。
-- **本版等待用户验收。** 当前测试不等于所有武器、网络环境或全部页面通过；AA 非 180° 服务器朝向、Visualise 和其他历史未验收项仍需独立验收。
+## Rage
 
-## 下载与目录
+左侧选择参数，中间调整 Accuracy，右侧集中管理 Rage Aimbot 和 Anti-Aim。Global、武器组、单把武器按层级组织；武器覆盖只保存 Accuracy，瞄准与 Anti-Aim 使用全局设置。
 
-[alpha-0.0.1 Release](https://github.com/KaguraWang/kAzeware/releases/tag/alpha-0.0.1) 提供 `kAzeware-alpha-0.0.1-standalone.dll`。DLL 静态链接 CRT，字体和命中音内嵌，不需配套 PDB 或外置音效。仍依赖 Windows 系统组件和当前游戏。
+- Hitboxes 与 Multipoint 集中在 Accuracy；MP 齿轮内提供逐部位比例。
+- MD、HC、MP 支持 Auto；自动 HC / MP 提供均衡、可靠性、时机三种策略。
+- DT 仅用于 Rage 枪械开火，排除 R8，并通过 widget 展示充能状态。
+- 射击外推与移动外推分别控制，配合伤害、命中率和穿墙路径判断。
 
-SHA-256：`2355f72e2ff0875fd6fa4b65fa5b5bb8e71e7bfdd9842cf570d5e091186f9d89`
+![Rage 页面：配置侧栏、Accuracy、Aimbot 与 Anti-Aim](docs/images/rage.png)
+
+## Legit
+
+从 FOV 和平滑到目标部位、瞄准曲线、扳机与后坐力控制，按用途分成五个子页面。支持单独的武器参数及条件检查。
+
+![Legit — Aim：FOV 与平滑](docs/images/legit.png)
+
+<details>
+<summary>查看 Targets、Humanization、Trigger / RCS、Semi-rage</summary>
+
+**Targets：目标部位、优先级与瞄准可视化。**
+
+![Legit — Targets](docs/images/legit-targets.png)
+
+**Humanization：曲线、速度变化、反应延迟与微调。**
+
+![Legit — Humanization](docs/images/legit-humanization.png)
+
+**Trigger / RCS：扳机条件、射击时序与后坐力控制。**
+
+![Legit — Trigger / RCS](docs/images/legit-trigger-rcs.png)
+
+**Semi-rage：Seed Trigger、预测急停与预测开镜。**
+
+![Legit — Semi-rage](docs/images/legit-semi-rage.png)
+
+</details>
+
+## Visuals
+
+本地、友方和敌方分别配置。玩家页面提供边框、血条、装备信息、状态标记、Glow 与多种 Chams 材质；本地页面集中镜头、模型和命中反馈。World 与 Nade Pred 分别管理环境效果和投掷物辅助。
+
+![Visuals — Enemy：ESP、状态标记与 Chams](docs/images/visuals.png)
+
+<details>
+<summary>查看 Local、Friendly、World、Nade Pred</summary>
+
+**Local：模型、镜头、显示移除与命中反馈。**
+
+![Visuals — Local](docs/images/visuals-local.png)
+
+**Friendly：独立的友方显示选项。**
+
+![Visuals — Friendly](docs/images/visuals-friendly.png)
+
+**World：天空、光照、天气、道具与环境效果。**
+
+![Visuals — World](docs/images/visuals-world.png)
+
+**Nade Pred：轨迹、落点与投掷点位采集 / 管理。**
+
+![Visuals — Nade Pred](docs/images/visuals-grenades.png)
+
+</details>
+
+## Skins
+
+通过图标网格浏览枪械、刀和手套，支持搜索与阵营区分；人物模型单独管理。皮肤配置包含磨损、模板和适用物品的 StatTrak 设置。
+
+![Skins — Guns：枪械浏览](docs/images/skins.png)
+
+<details>
+<summary>查看 Knives、Gloves、Agents</summary>
+
+**Knives。**
+
+![Skins — Knives](docs/images/skins-knives.png)
+
+**Gloves。**
+
+![Skins — Gloves](docs/images/skins-gloves.png)
+
+**Agents：双方人物模型与自定义入口。**
+
+![Skins — Agents](docs/images/skins-agents.png)
+
+</details>
+
+## Misc
+
+移动、近战、投掷控制和信息 widgets 集中管理。包含 Bhop、Autostrafe、Quick Peek、Duck Peek、刀 / 电击枪辅助，以及按键列表、炸弹信息和观战列表。Quick Peek 可选择是否仅等待同一目标的 DT 第二发。
+
+![Misc：移动、近战、投掷与 HUD](docs/images/misc.png)
+
+## Config
+
+保存和加载参数，管理压缩、DPI、圆角、默认页面及翻译包。多数功能可通过右键绑定快捷键，齿轮展开对应的细节设置。
+
+![Config：参数、界面样式与翻译](docs/images/config.png)
+
+## 使用与构建
+
+- 发布包见 [Releases](https://github.com/KaguraWang/kAzeware/releases)。Windows x64 standalone DLL 静态链接 CRT，字体和命中音内嵌。
+- `Insert` 开关菜单，`F4` 正常卸载。
+- 参数与翻译位于 `Documents/kAzeware/Configs/`；投掷点位位于 `Documents/kAzeware/GrenadeHelpers/`。
+
+<details>
+<summary>源码结构与构建说明</summary>
+
+项目采用 C++23、Direct3D 11 和 ImGui。
 
 ```text
-kAzeware.sln
-kAzeware/
-  kAzeware.vcxproj           DLL 工程
-  external/                 第三方源码依赖
-  resources/                内嵌资源
-  source/main.cpp           DLL 入口、渲染、输入与卸载
-  source/cs2/               游戏实体 / SDK
-  source/kAzeware/           功能、菜单、配置与接口
-loader/                     可选加载器工程
-translations/               英文 / 简体中文 .kt1 包
-dumper/output/              游戏 SDK 参考快照
-tools/audit_cs2_current.py   当前地址 / 签名审计
-README.md                   工程入口
+kAzeware/source/     游戏 SDK、功能、菜单与配置
+kAzeware/external/   第三方源码依赖
+kAzeware/resources/  内嵌资源
+loader/              可选加载器工程
+translations/        翻译包
+bin/x64/Release/     本地构建输出
 ```
 
-`bin/`、`obj/` 是本地构建输出；个人参数、缓存、诊断工具和测试记录不纳入源码仓库。DLL 通过 Release 分发。
-
-## 构建与运行
-
-本机验证环境：Visual Studio Build Tools v145、Windows SDK 10.0.26100.0、DirectX SDK June 2010。工程中保留 DirectX SDK 的默认安装目录；其他环境按实际安装位置调整。第三方源码位于 `kAzeware/external/`。
+本机验证环境为 Visual Studio Build Tools v145、Windows SDK 10.0.26100.0、DirectX SDK June 2010。工程沿用 DirectX SDK 默认安装目录，其他安装位置需对应调整。
 
 在根目录 PowerShell 执行：
 
@@ -56,22 +146,27 @@ $env:CL='/FS'
 & 'C:/Program Files (x86)/Microsoft Visual Studio/18/BuildTools/MSBuild/Current/Bin/MSBuild.exe' kAzeware.sln /m:1 /t:Build /p:Configuration=Release /p:Platform=x64 /p:MultiProcessorCompilation=false /v:minimal /nologo
 ```
 
-DLL 输出 `bin/x64/Release/kAzeware.dll`；解决方案另含可选的 `kAzeware-loader.exe`。本版仅重新构建并发布 DLL。替换已加载版本前先正常卸载；PDB 仅供开发，必须与 DLL 来自同一次构建。
+DLL 输出 `bin/x64/Release/kAzeware.dll`；解决方案另含可选加载器。第三方依赖保留各自许可证，上游授权见 [LICENSE](LICENSE)。
 
-`Insert` 开关菜单，`F4` 正常卸载。配置和翻译保存在 `Documents/kAzeware/Configs/`；投掷点位在 `Documents/kAzeware/GrenadeHelpers/`，日志、缓存和崩溃记录位于 `Documents/kAzeware/`。首次运行使用默认配置，翻译包需在配置页选择并应用。
+</details>
 
-地址审计：
+## 版本公告
 
-```powershell
-python tools/audit_cs2_current.py --game-dir 'D:\SteamLibrary\steamapps\common\Counter-Strike Global Offensive\game'
-```
+### alpha-0.0.1 · 2026-11-12
 
-审计核对二进制指纹、源码字段、关键签名和预测兜底地址；游戏更新后旧指纹应失败。`dumper/output/info.json` 记录快照刷新范围，未重建的枚举和接口表仍是参考。
+[下载此版本](https://github.com/KaguraWang/kAzeware/releases/tag/alpha-0.0.1)
 
-## 维护
+- Rage 改为 Config 侧栏 + Accuracy + 全局 Aimbot / Anti-Aim；支持搜索新增武器或组，手持武器置顶、右键确认移除。
+- Hitboxes / Multipoint 移入 Accuracy；MP 齿轮常驻，保留逐部位比例；HC 齿轮仅 Auto 时显示。
+- Quick Peek 增加“仅等待同目标 DT 第二发”的可选策略，默认沿用原等待行为；调整斜面 / 楼梯回撤的碰撞与速度处理。
+- 菜单标志与 DLL 属性统一显示 `alpha-0.0.1`。
+- 适配基于 CS2 1.41.9.7 / build 14197；游戏更新后需重新核对兼容性。
 
-遵守根目录 `.clang-format`。第三方依赖、参考 dump、内嵌资源头不做机械格式重排。每次功能变化同步更新公开 README 和本地交接记录；构建通过、有限实测、已加载待验收和用户验收通过必须分别记录。测试专用探针及入口不得进入正式源码和 DLL。
+本版为 Alpha，已完成构建和有限本地验证，等待用户验收。非 180° AA 开火朝向、Visualise 稳定性及严格分目标回撤仍有待完整验收。
 
-`AGENTS.md`、`HANDOFF.md` 及本地交接历史副本只在工作区维护，不纳入后续源码上传或 Release 打包。
+DLL SHA-256：`2355f72e2ff0875fd6fa4b65fa5b5bb8e71e7bfdd9842cf570d5e091186f9d89`
 
-保留 [MIT 授权及上游版权](LICENSE)；第三方依赖沿用各自许可证。
+---
+
+<p align="center">支持千早爱音谢谢喵</p>
+<p align="center"><img src="docs/images/support.jpg" width="360" alt="赞赏码"></p>
