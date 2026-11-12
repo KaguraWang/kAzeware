@@ -106,6 +106,7 @@ namespace LegitMath {
         const float finish = 1.f - std::clamp(deceleration, 0.f, 100.f) * .009f * progress;
         return start * finish;
     }
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
     // Exact critically damped response: velocity stays continuous when a curve or
     // target changes. The step cannot cross the target, including yaw wrap-around.

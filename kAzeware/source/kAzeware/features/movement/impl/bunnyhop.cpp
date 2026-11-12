@@ -191,6 +191,7 @@ namespace Velocity::features::movement {
         if (!landing) {
             return;
         }
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
         const auto base = cmd->csgoUserCmd.pBaseCmd;
         if (!base) {

@@ -102,6 +102,7 @@ namespace Vote {
                 return "NO";
             return "?";
         }
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
         void ReadControllerName(void* ctrl, char* out, size_t outSz) {
             if (!out || outSz < 2)

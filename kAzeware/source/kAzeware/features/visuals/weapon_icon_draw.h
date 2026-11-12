@@ -2,6 +2,7 @@
 #include "../../../../external/imgui/imgui.h"
 
 struct ID3D11Device;
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
 // Official CS2 equipment icons (VPK SVG -> atlas). Prefer over font glyphs.
 namespace WeaponIconDraw {

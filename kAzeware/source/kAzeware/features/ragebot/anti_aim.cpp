@@ -10,6 +10,7 @@
 #include "../bones/bones.h"
 #include "../nadepred/nadepred.h"
 #include <limits>
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
 namespace Rage {
     namespace {

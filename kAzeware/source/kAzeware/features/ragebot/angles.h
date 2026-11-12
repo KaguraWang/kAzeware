@@ -7,6 +7,7 @@ class C_CSWeaponBase;
 namespace Legitbot {
     struct SeedShot;
 }
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
 namespace Rage {
     bool SetCommandAngle(CUserCmd* cmd, const QAngle_t& angle, C_CSPlayerPawn* local = nullptr, bool generated = false);

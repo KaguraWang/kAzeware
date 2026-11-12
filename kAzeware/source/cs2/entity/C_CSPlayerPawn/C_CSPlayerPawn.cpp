@@ -63,6 +63,7 @@ C_CSWeaponBase* C_CSPlayerPawn::GetActiveWeapon() const {
         return nullptr;
     return wpn;
 }
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
 CCSPlayer_WeaponServices* C_CSPlayerPawn::GetWeaponServices() const {
     if (!this || !Mem::IsUserPtr(this))

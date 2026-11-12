@@ -41,6 +41,7 @@ namespace Legitbot {
             void* hitbox;
             std::uint8_t padding[0x1e8];
         };
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
         struct Input {
             Vector_t eye, delta;

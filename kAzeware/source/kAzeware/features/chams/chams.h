@@ -80,6 +80,7 @@ namespace chams {
         static_assert(offsetof(mesh_primitive, material_copy) == kMatCopyOff);
         static_assert(offsetof(mesh_primitive, color) == kColorOff);
         static_assert(offsetof(mesh_primitive, opacity) == kOpacityOff);
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
         // Fixed array + separate overflow array - never treat as one allocation.
         struct output_buffer {

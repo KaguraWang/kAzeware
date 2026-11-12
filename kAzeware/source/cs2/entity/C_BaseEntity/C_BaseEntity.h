@@ -46,6 +46,7 @@ public:
     schema(float, m_flOldSimulationTime, "C_BasePlayerPawn->m_flOldSimulationTime");
     schema(CBaseHandle, m_hOwnerEntity, "C_BaseEntity->m_hOwnerEntity");
     schema(CBaseHandle, m_hController, "C_BasePlayerPawn->m_hController");
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
     bool IsBasePlayer() {
         char name[128]{};

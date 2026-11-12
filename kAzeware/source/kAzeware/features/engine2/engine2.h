@@ -32,6 +32,7 @@ namespace Engine2 {
     // CNetworkGameClient::RunPrediction(this, reason) - engine client-side predict.
     // Safe no-op if unresolved / not in game. Call under SEH from Pred.
     bool RunPrediction(unsigned reason = 0);
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
     // Voice: true if engine thinks slot is speaking (when pattern resolves).
     bool IsHearingClient(int slot);

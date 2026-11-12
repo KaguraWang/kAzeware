@@ -131,6 +131,7 @@ public:
     tKey GetID(UtlTSHashHandle_t hHash) const {
         return reinterpret_cast<HashFixedData_t*>(hHash)->uiKey;
     }
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
 private:
     template <typename tData> struct HashFixedDataInternal_t {

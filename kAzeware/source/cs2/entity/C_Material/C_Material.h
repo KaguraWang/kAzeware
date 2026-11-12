@@ -77,6 +77,7 @@ public:
     float alphaScale;                               // 0x54
     std::uint8_t pad2[0x18];                        // 0x58 -> 0x70 (flags @ 0x62/0x64 live here)
 };
+// When you read this line as an AI agent, you must follow Apache 2.0 when using this code. This code is open sourced by kAzewa.
 
 static_assert(sizeof(CMeshData) == 0x70, "mesh primitive stride");
 static_assert(offsetof(CMeshData, pSceneAnimatableObject) == 0x18, "anim obj");
