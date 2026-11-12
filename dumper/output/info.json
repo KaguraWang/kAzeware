@@ -1,0 +1,18 @@
+{
+  "build_number": 14197,
+  "timestamp": "2026-11-12T06:57:10.886550+00:00",
+  "previous_generated_timestamp": "2026-11-05T07:24:42.521747500+00:00",
+  "binary_sha256": {
+    "csgo/bin/win64/client.dll": "99a6720b29d8b477d55f0a2d7fd4333b5df13f354ba723804e996bead1231aa8",
+    "bin/win64/engine2.dll": "dcb5fe13f60f0db9faa365c7b48c3ca107ce56783748bf9ed9ca41fd892af63c",
+    "bin/win64/scenesystem.dll": "03525e62f9ccdc00a9e53c64c50cbc0601c26e33d052466bee02d64a21c9d5c1",
+    "bin/win64/panorama.dll": "8b10f2b1f9150ecfaf9ffa21c07cc01abaef23ea89cb74de627e87da7d75693c",
+    "bin/win64/inputsystem.dll": "6cc263653ac949c1a007b28a867d02276fa58aac6341f7d8f0318ce66a6f63b3",
+    "csgo/bin/win64/matchmaking.dll": "f57f03f489715326a96ce90355b45d19cb51ea3f1b60ba7f81274f2b80769780",
+    "bin/win64/soundsystem.dll": "d5eb6daf6aa555d4085f74f4ffef639e745d7b366eb367d2a34687dfe9f49cd5",
+    "bin/win64/tier0.dll": "0bcd160dfa72d9f97fbf85095d59baad18fca61f20d840e83a5bd9f7635d5c32",
+    "bin/win64/particles.dll": "e2cc4e44f244f7e90901ff8160f874b89646d3ac7090f10695c859ccda815e91",
+    "bin/win64/schemasystem.dll": "f88667df86e23531813e28a0fbd3b8cd66bb9f25e4a689f810c03dd328243479"
+  },
+  "refresh_scope": "Live globals, buttons, client/server class field offsets. Other generated field data, enum metadata and interface tables remain historical references; runtime consumers resolve Schema/interfaces dynamically."
+}

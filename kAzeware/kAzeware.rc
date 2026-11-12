@@ -1,0 +1,78 @@
+#include <winres.h>
+#include "source/kAzeware/version.h"
+
+1 VERSIONINFO
+ FILEVERSION KAZEWARE_VERSION_NUMBER
+ PRODUCTVERSION KAZEWARE_VERSION_NUMBER
+ FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
+ FILEFLAGS VS_FF_PRERELEASE
+ FILEOS VOS_NT_WINDOWS32
+ FILETYPE VFT_DLL
+ FILESUBTYPE VFT2_UNKNOWN
+BEGIN
+ BLOCK "StringFileInfo"
+ BEGIN
+  BLOCK "040904b0"
+  BEGIN
+   VALUE "FileDescription", "kAzeware standalone"
+   VALUE "FileVersion", KAZEWARE_VERSION
+   VALUE "InternalName", "kAzeware"
+   VALUE "OriginalFilename", KAZEWARE_DLL_NAME
+   VALUE "ProductName", "kAzeware"
+   VALUE "ProductVersion", KAZEWARE_VERSION
+  END
+ END
+ BLOCK "VarFileInfo"
+ BEGIN
+  VALUE "Translation", 0x409, 1200
+ END
+END
+
+24576 RCDATA "resources\\hitsounds\\agpa1.vsnd_c.wav"
+24577 RCDATA "resources\\hitsounds\\agpa2.vsnd_c.wav"
+24578 RCDATA "resources\\hitsounds\\aimbooster.vsnd_c.wav"
+24579 RCDATA "resources\\hitsounds\\amongus_kill.vsnd_c.wav"
+24580 RCDATA "resources\\hitsounds\\applepay.vsnd_c.wav"
+24581 RCDATA "resources\\hitsounds\\arena_switch.vsnd_c.wav"
+24582 RCDATA "resources\\hitsounds\\bameware.vsnd_c.wav"
+24583 RCDATA "resources\\hitsounds\\bell.vsnd_c.wav"
+24584 RCDATA "resources\\hitsounds\\ben.vsnd_c.wav"
+24585 RCDATA "resources\\hitsounds\\bonk.vsnd_c.wav"
+24586 RCDATA "resources\\hitsounds\\brotato.vsnd_c.wav"
+24587 RCDATA "resources\\hitsounds\\bubble.vsnd_c.wav"
+24588 RCDATA "resources\\hitsounds\\click.vsnd_c.wav"
+24589 RCDATA "resources\\hitsounds\\cod.vsnd_c.wav"
+24590 RCDATA "resources\\hitsounds\\combobreak.vsnd_c.wav"
+24591 RCDATA "resources\\hitsounds\\door.vsnd_c.wav"
+24592 RCDATA "resources\\hitsounds\\fatality.vsnd_c.wav"
+24593 RCDATA "resources\\hitsounds\\flush.vsnd_c.wav"
+24594 RCDATA "resources\\hitsounds\\grenade_jumpthrow.vsnd_c.wav"
+24595 RCDATA "resources\\hitsounds\\hentai1.vsnd_c.wav"
+24596 RCDATA "resources\\hitsounds\\hentai2.vsnd_c.wav"
+24597 RCDATA "resources\\hitsounds\\hentai3.vsnd_c.wav"
+24598 RCDATA "resources\\hitsounds\\kick.vsnd_c.wav"
+24599 RCDATA "resources\\hitsounds\\kill_doof_01.vsnd_c.wav"
+24600 RCDATA "resources\\hitsounds\\killcard_1.vsnd_c.wav"
+24601 RCDATA "resources\\hitsounds\\minecraft_bow_ding.vsnd_c.wav"
+24602 RCDATA "resources\\hitsounds\\minecraft_button.vsnd_c.wav"
+24603 RCDATA "resources\\hitsounds\\minecraft_egg_throw.vsnd_c.wav"
+24604 RCDATA "resources\\hitsounds\\minecraft_hit.vsnd_c.wav"
+24605 RCDATA "resources\\hitsounds\\minecraft_xp_gain.vsnd_c.wav"
+24606 RCDATA "resources\\hitsounds\\money_claim.vsnd_c.wav"
+24607 RCDATA "resources\\hitsounds\\mouthsound.vsnd_c.wav"
+24608 RCDATA "resources\\hitsounds\\msfrs.vsnd_c.wav"
+24609 RCDATA "resources\\hitsounds\\na naxuy.vsnd_c.wav"
+24610 RCDATA "resources\\hitsounds\\pop.vsnd_c.wav"
+24611 RCDATA "resources\\hitsounds\\pubg_pan.vsnd_c.wav"
+24612 RCDATA "resources\\hitsounds\\quaver.vsnd_c.wav"
+24613 RCDATA "resources\\hitsounds\\regulus.vsnd_c.wav"
+24614 RCDATA "resources\\hitsounds\\rust_headshot.vsnd_c.wav"
+24615 RCDATA "resources\\hitsounds\\satisfying click.vsnd_c.wav"
+24616 RCDATA "resources\\hitsounds\\spiral knight.vsnd_c.wav"
+24617 RCDATA "resources\\hitsounds\\stony.vsnd_c.wav"
+24618 RCDATA "resources\\hitsounds\\tavern_misc1c.vsnd_c.wav"
+24619 RCDATA "resources\\hitsounds\\telegram_notification.vsnd_c.wav"
+24620 RCDATA "resources\\hitsounds\\trident_pierce.vsnd_c.wav"
+24621 RCDATA "resources\\hitsounds\\water_drop.vsnd_c.wav"
+24622 RCDATA "resources\\hitsounds\\xp_rankdown_02.vsnd_c.wav"
+24623 RCDATA "resources\\hitsounds\\zelda.vsnd_c.wav"

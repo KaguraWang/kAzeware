@@ -1,0 +1,66 @@
+# Build output
+x64/
+bin/
+obj/
+*.obj
+*.lib
+*.exp
+*.pdb
+*.ilk
+*.ipdb
+*.iobj
+*.dll
+*.recipe
+*.log
+*.lastbuildstate
+*.FileListAbsolute.txt
+*.CppClean.log
+*.tlog/
+
+# VS
+.vs/
+*.user
+*.suo
+*.sdf
+*.opensdf
+*.opendb
+
+# Temp / tools
+_rain_extract/
+_tools/
+_weather_cache/
+
+# External (vendored, keep in repo but ignore own builds)
+# external/imgui, external/safetyhook, etc are tracked
+
+# SDK dump (large, not source)
+cs2 sdk dump all you need/
+
+# macOS
+.DS_Store
+
+# IDE
+*.swp
+*.swo
+*~
+
+# Local tooling / caches (not source)
+.freebuff/
+.agents/
+
+
+# ProjectAtlas local index state
+.projectatlas/
+# Local backups (do not track)
+*.bak_*
+*.bak
+
+# Local investigation artifacts (not source)
+_font_test/
+_loader_re/
+_inject_tool/
+
+# Workspace-only agent state and Python caches
+/.codex/
+__pycache__/
+*.py[cod]

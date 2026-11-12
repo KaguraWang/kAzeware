@@ -1,0 +1,34 @@
+	Resource Type: Sound [Version 5] [Header Version: 12]
+	File Size: 1314 bytes
+
+
+--- (No External Resource References Found)
+
+
+--- Resource Blocks: Count 3 ---
+	-- Block: RED2  Size: 802    bytes [Offset:     64]
+	-- Block: CTRL  Size: 434    bytes [Offset:    880]
+	-- Block: DATA  Size: 0      bytes [Offset:   1314]
+
+
+--- Data for block "CTRL" ---
+<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
+{
+	_class = "CVoiceContainerDefault"
+	m_vSound = 
+	{
+		m_nRate = 44100
+		m_nFormat = "MP3"
+		m_nChannels = 1
+		m_nLoopStart = -1
+		m_nSampleCount = 11835
+		m_flDuration = 0.268367
+		m_Sentences = [  ]
+		m_nStreamingSize = 5422
+		m_nSeekTable = [  ]
+		m_nLoopEnd = 0
+		m_encodedHeader = #[  ]
+	}
+	m_pEnvelopeAnalyzer = null
+}
+

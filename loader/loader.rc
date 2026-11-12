@@ -1,0 +1,37 @@
+﻿#include <winres.h>
+
+1 VERSIONINFO
+ FILEVERSION 1,1,7,0
+ PRODUCTVERSION 1,1,7,0
+ FILEFLAGSMASK 0x0000003FL
+ FILEFLAGS 0
+ FILEOS 0x00040004L
+ FILETYPE 0x00000001L
+ FILESUBTYPE 0x00000000L
+BEGIN
+ BLOCK "StringFileInfo"
+ BEGIN
+  BLOCK "040904b0"
+  BEGIN
+   VALUE "FileDescription", "kAzeware loader"
+   VALUE "FileVersion", "1.1.7"
+   VALUE "InternalName", "kAzeware-loader"
+   VALUE "OriginalFilename", "kAzeware-loader.exe"
+   VALUE "ProductName", "kAzeware"
+   VALUE "ProductVersion", "1.1.7"
+  END
+ END
+ BLOCK "VarFileInfo"
+ BEGIN
+  VALUE "Translation", 0x409, 1200
+ END
+END
+
+
+
+
+
+
+
+
+

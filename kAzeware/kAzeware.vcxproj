@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{04B17470-CB82-4724-904B-25445926AB86}</ProjectGuid>
+    <RootNamespace>kAzeware</RootNamespace>
+    <ProjectName>kAzeware</ProjectName>
+    <TargetName>kAzeware</TargetName>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+      <CharacterSet>MultiByte</CharacterSet>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+      <CharacterSet>MultiByte</CharacterSet>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+      <CharacterSet>MultiByte</CharacterSet>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+      <CharacterSet>MultiByte</CharacterSet>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)obj\kAzeware\$(Platform)\$(Configuration)\</IntDir>
+    <LibraryPath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)obj\kAzeware\$(Platform)\$(Configuration)\</IntDir>
+    <LibraryPath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)obj\kAzeware\$(Platform)\$(Configuration)\</IntDir>
+    <LibraryPath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)obj\kAzeware\$(Platform)\$(Configuration)\</IntDir>
+    <LibraryPath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp23</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard_C>Default</LanguageStandard_C>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <!-- /Zc:threadSafeInit- : no _Init_thread_header/_tls_index -> no TLS
+           directory in the final image. Manual mappers don't set up TLS, so
+           guarded function-local static init reads garbage -> instant crash.
+           Function-local statics here are per-thread/per-frame caches only. -->
+      <AdditionalOptions>/utf-8 /Zc:threadSafeInit- %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(ProjectDir)external\safetyhook;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalUsingDirectories>
+      </AdditionalUsingDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp23</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard_C>Default</LanguageStandard_C>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <!-- /Zc:threadSafeInit- : no _Init_thread_header/_tls_index -> no TLS
+           directory in the final image. Manual mappers don't set up TLS, so
+           guarded function-local static init reads garbage -> instant crash.
+           Function-local statics here are per-thread/per-frame caches only. -->
+      <AdditionalOptions>/utf-8 /Zc:threadSafeInit- %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(ProjectDir)external\safetyhook;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalUsingDirectories>
+      </AdditionalUsingDirectories>
+    </ClCompile>
+    <Link>
+      <!-- Re-optimize all callers when movement parameter usage changes. -->
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <AdditionalOptions>/PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="external\imgui\imgui.cpp" />
+    <!-- imgui_demo: not called; exclude to cut Release link weight -->
+    <ClCompile Include="external\imgui\imgui_demo.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="external\imgui\imgui_draw.cpp" />
+    <ClCompile Include="external\imgui\imgui_tables.cpp" />
+    <ClCompile Include="external\imgui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="external\lz4.c" />
+    <ClCompile Include="external\safetyhook\safetyhook.cpp" />
+    <ClCompile Include="external\safetyhook\Zydis.c" />
+    <ClCompile Include="external\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="external\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="source\cs2\datatypes\cutlbuffer\cutlbuffer.cpp" />
+    <ClCompile Include="source\cs2\datatypes\cutl\utlhash\utlhash.cpp" />
+    <ClCompile Include="source\cs2\datatypes\keyvalues\keyvalues.cpp" />
+    <ClCompile Include="source\cs2\datatypes\schema\ISchemaClass\ISchemaClass.cpp" />
+    <ClCompile Include="source\cs2\entity\CCSPlayerController\CCSPlayerController.cpp" />
+    <ClCompile Include="source\cs2\entity\C_CSPlayerPawn\C_CSPlayerPawn.cpp" />
+    <ClCompile Include="source\cs2\entity\C_CSWeaponBase\C_CSWeaponBase.cpp" />
+    <ClCompile Include="source\kAzeware\features\gamemode\gamemode.cpp" />
+    <ClCompile Include="source\kAzeware\features\engine2\engine2.cpp" />
+    <ClCompile Include="source\kAzeware\features\w2s\w2s.cpp" />
+    <ClCompile Include="source\kAzeware\features\bomb\bomb.cpp" />
+    <ClCompile Include="source\kAzeware\features\enemy_spec\enemy_spec.cpp" />
+    <ClCompile Include="source\kAzeware\features\legitbot\bindings.cpp" />
+    <ClCompile Include="source\kAzeware\features\legitbot\profiles.cpp" />
+    <ClCompile Include="source\kAzeware\features\legitbot\legitbot.cpp" />
+    <ClCompile Include="source\kAzeware\features\legitbot\smoke.cpp" />
+    <ClCompile Include="source\kAzeware\features\legitbot\damage.cpp" />
+    <ClCompile Include="source\kAzeware\features\legitbot\trigger.cpp" />
+    <ClCompile Include="source\kAzeware\features\legitbot\accuracy.cpp" />
+    <ClCompile Include="source\kAzeware\features\legitbot\semi_rage.cpp" />
+    <ClCompile Include="source\kAzeware\features\legitbot\hitboxes.cpp" />
+    <ClCompile Include="source\kAzeware\features\legitbot\events.cpp" />
+    <ClCompile Include="source\kAzeware\features\legitbot\legit_visuals.cpp" />
+    <ClCompile Include="source\kAzeware\features\legitbot\target.cpp" />
+    <ClCompile Include="source\kAzeware\features\bones\bones.cpp" />
+    <ClCompile Include="source\kAzeware\features\trace\trace.cpp" />
+    <ClCompile Include="source\kAzeware\features\grenade_helper\grenade_helper.cpp" />
+    <ClCompile Include="source\kAzeware\features\nadepred\nadepred.cpp" />
+    <ClCompile Include="source\kAzeware\features\hitmarker\hitmarker.cpp" />
+    <ClCompile Include="source\kAzeware\features\bullet_impact\bullet_impact.cpp" />
+    <ClCompile Include="source\kAzeware\features\hitsound\hitsound.cpp" />
+    <ClCompile Include="source\kAzeware\features\sound_esp\sound_esp.cpp" />
+    <ClCompile Include="source\kAzeware\features\vote\vote.cpp" />
+    <ClCompile Include="source\kAzeware\features\widgets\widgets.cpp" />
+    <ClCompile Include="source\kAzeware\features\radar\radar.cpp" />
+    <ClCompile Include="source\kAzeware\features\movement\peek_assist.cpp" />
+    <ClCompile Include="source\kAzeware\features\visuals\removals\local_removals.cpp" />
+    <ClCompile Include="source\kAzeware\features\widgets\steam_avatar.cpp" />
+    <ClCompile Include="source\kAzeware\features\notify\notify.cpp" />
+    <ClCompile Include="source\kAzeware\features\chams\chams.cpp" />
+    <ClCompile Include="source\kAzeware\features\glow\glow.cpp" />
+    <ClCompile Include="source\kAzeware\features\panorama\panorama.cpp" />
+    <ClCompile Include="source\kAzeware\features\scoreboard_weapons\scoreboard_weapons.cpp" />
+    <ClCompile Include="source\kAzeware\features\hitlog\hitlog.cpp" />
+    <ClCompile Include="source\kAzeware\features\movement\velocity_movement.cpp" />
+    <ClCompile Include="source\kAzeware\features\movement\impl\airstrafe.cpp" />
+    <ClCompile Include="source\kAzeware\features\movement\impl\bunnyhop.cpp" />
+    <ClCompile Include="source\kAzeware\features\movement\impl\edgebug.cpp" />
+    <ClCompile Include="source\kAzeware\features\movement\impl\edgejump.cpp" />
+    <ClCompile Include="source\kAzeware\features\movement\impl\edgestop.cpp" />
+    <ClCompile Include="source\kAzeware\features\movement\impl\fastladder.cpp" />
+    <ClCompile Include="source\kAzeware\features\movement\impl\jumpbug.cpp" />
+    <ClCompile Include="source\kAzeware\features\movement\impl\slowwalk.cpp" />
+    <ClCompile Include="source\kAzeware\features\movement\impl\test_strafer.cpp" />
+    <ClCompile Include="source\kAzeware\features\input_inject\input_inject.cpp" />
+    <ClCompile Include="source\kAzeware\features\prediction\prediction.cpp" />
+    <ClCompile Include="source\kAzeware\features\sdk_prio_a\sdk_prio_a.cpp" />
+    <ClCompile Include="source\kAzeware\features\skinchanger\skin_sdk.cpp" />
+    <ClCompile Include="source\kAzeware\features\skinchanger\skin_items.cpp" />
+    <ClCompile Include="source\kAzeware\features\skinchanger\skin_preview.cpp" />
+    <ClCompile Include="source\kAzeware\features\skinchanger\skinchanger.cpp" />
+    <ClCompile Include="source\kAzeware\features\skinchanger\skin_menu.cpp" />
+    <ClCompile Include="source\kAzeware\features\custom_paint\custom_paint.cpp" />
+    
+    <ClCompile Include="source\kAzeware\features\visuals\antiflash\antiflash.cpp" />
+    <ClCompile Include="source\kAzeware\features\visuals\fov\fov.cpp" />
+    <ClCompile Include="source\kAzeware\features\visuals\scope\scope.cpp" />
+    <ClCompile Include="source\kAzeware\features\visuals\removals\removals.cpp" />
+    <ClCompile Include="source\kAzeware\interfaces\CGameEntitySystem\CGameEntitySystem.cpp" />
+    <ClCompile Include="source\kAzeware\interfaces\interfaces.cpp" />
+    <ClCompile Include="source\kAzeware\config\config.cpp" />
+    <ClCompile Include="source\kAzeware\config\language.cpp" />
+    <ClCompile Include="source\kAzeware\features\world\skybox.cpp" />
+    <ClCompile Include="source\kAzeware\features\world\world.cpp" />
+    <ClCompile Include="source\kAzeware\features\ragebot\visualise.cpp" />
+    <ClInclude Include="source\kAzeware\features\ragebot\visualise.h" />
+    <ClCompile Include="source\kAzeware\features\world\utility_range.cpp" />
+    <ClInclude Include="source\kAzeware\features\world\utility_range.h" />
+    <ClCompile Include="source\kAzeware\features\world\weather.cpp" />
+    <ClCompile Include="source\kAzeware\features\world\fog_handler.cpp" />
+    <ClCompile Include="source\kAzeware\hooks\hooks.cpp" />
+    <ClCompile Include="source\kAzeware\keybinds\keybinds.cpp" />
+    <ClCompile Include="source\kAzeware\menu\hud.cpp" />
+    <ClCompile Include="source\kAzeware\utils\logging\log.cpp" />
+    <ClCompile Include="source\kAzeware\utils\console\console.cpp" />
+    <ClCompile Include="source\kAzeware\utils\cvar\cvar.cpp" />
+    <ClCompile Include="source\kAzeware\utils\memory\gaa\gaa.cpp" />
+    <ClCompile Include="source\kAzeware\utils\math\vector\vector.cpp" />
+    <ClCompile Include="source\kAzeware\utils\math\viewmatrix\viewmatrix.cpp" />
+    <ClCompile Include="source\kAzeware\utils\memory\memsafe\memsafe.cpp" />
+    <ClCompile Include="source\kAzeware\utils\memory\patternscan\patternscan.cpp" />
+    <ClCompile Include="source\kAzeware\utils\module\module.cpp" />
+    <ClCompile Include="source\kAzeware\utils\security\sehsupport.cpp" />
+    <ClCompile Include="source\kAzeware\utils\security\crashdump.cpp" />
+    <ClCompile Include="source\kAzeware\kAzeware.cpp" />
+    <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\kAzeware\menu\menu.cpp" />
+    <ClCompile Include="source\kAzeware\menu\menu_ui.cpp" />
+    <ClCompile Include="source\kAzeware\features\visuals\visuals.cpp" />
+    <ClCompile Include="source\kAzeware\features\visuals\weapon_icon_draw.cpp" />
+    <ClCompile Include="source\kAzeware\utils\schema\schema.cpp" />
+    <ClCompile Include="source\cs2\sdk\IGameEvent.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\kAzeware\features\legitbot\bindings.h" />
+    <ClInclude Include="source\kAzeware\features\legitbot\profiles.h" />
+    <ClInclude Include="source\kAzeware\features\legitbot\legitbot.h" />
+    <ClInclude Include="source\kAzeware\features\legitbot\smoke.h" />
+    <ClInclude Include="source\kAzeware\features\legitbot\ray.h" />
+    <ClInclude Include="source\kAzeware\features\legitbot\recoil.h" />
+    <ClInclude Include="source\kAzeware\features\legitbot\damage.h" />
+    <ClInclude Include="source\kAzeware\features\legitbot\trigger_timing.h" />
+    <ClInclude Include="source\kAzeware\features\legitbot\trigger.h" />
+    <ClInclude Include="source\kAzeware\features\legitbot\hitboxes.h" />
+    <ClInclude Include="source\kAzeware\features\legitbot\events.h" />
+    <ClInclude Include="source\kAzeware\features\legitbot\visuals.h" />
+    <ClInclude Include="source\kAzeware\features\legitbot\target.h" />
+    <ClInclude Include="source\kAzeware\features\legitbot\legit_math.h" />
+    <ClInclude Include="source\kAzeware\features\movement\movement.hpp" />
+    <ClInclude Include="source\kAzeware\features\movement\velocity_sdk.h" />
+    <ClInclude Include="source\kAzeware\features\movement\velocity_movement.h" />
+    <ClInclude Include="external\imgui\imconfig.h" />
+    <ClInclude Include="external\imgui\imgui.h" />
+    <ClInclude Include="external\imgui\imgui_impl_dx11.h" />
+    <ClInclude Include="external\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="external\imgui\imgui_internal.h" />
+    <ClInclude Include="external\imgui\imstb_rectpack.h" />
+    <ClInclude Include="external\imgui\imstb_textedit.h" />
+    <ClInclude Include="external\imgui\imstb_truetype.h" />
+    <ClInclude Include="external\json\json.hpp" />
+    <ClInclude Include="external\lz4.h" />
+    <ClInclude Include="external\stb_image.h" />
+    <ClInclude Include="source\cs2\datatypes\cutlbuffer\cutlbuffer.h" />
+    <ClInclude Include="source\cs2\datatypes\cutl\utlhash\utlhash.h" />
+    <ClInclude Include="source\cs2\datatypes\keyvalues\keyvalues.h" />
+    <ClInclude Include="source\cs2\datatypes\viewmatrix\viewmatrix.h" />
+    <ClInclude Include="source\cs2\datatypes\schema\ISchemaClass\ISchemaClass.h" />
+    <ClInclude Include="source\cs2\entity\C_AggregateSceneObject\C_AggregateSceneObject.h" />
+    <ClInclude Include="source\cs2\entity\C_BaseEntity\C_BaseEntity.h" />
+    <ClInclude Include="source\cs2\entity\CCSPlayerController\CCSPlayerController.h" />
+    <ClInclude Include="source\cs2\entity\C_CSPlayerPawn\C_CSPlayerPawn.h" />
+    <ClInclude Include="source\cs2\entity\C_CSWeaponBase\C_CSWeaponBase.h" />
+    <ClInclude Include="source\cs2\entity\C_EntityInstance\C_EntityInstance.h" />
+    <ClInclude Include="source\cs2\entity\C_Material\C_Material.h" />
+    <ClInclude Include="source\cs2\entity\handle.h" />
+    <ClInclude Include="source\kAzeware\features\gamemode\gamemode.h" />
+    <ClInclude Include="source\kAzeware\features\trace\trace.h" />
+    <ClInclude Include="source\kAzeware\features\grenade_helper\grenade_helper.h" />
+    <ClInclude Include="source\kAzeware\features\nadepred\nadepred.h" />
+    <ClInclude Include="source\kAzeware\features\hitmarker\hitmarker.h" />
+    <ClInclude Include="source\kAzeware\features\bullet_impact\bullet_impact.h" />
+    <ClInclude Include="source\kAzeware\features\hitsound\hitsound.h" />
+    <ClInclude Include="source\kAzeware\features\sound_esp\sound_esp.h" />
+    <ClInclude Include="source\kAzeware\features\vote\vote.h" />
+    <ClInclude Include="source\kAzeware\features\panorama\panorama.h" />
+    <ClInclude Include="source\kAzeware\features\scoreboard_weapons\scoreboard_weapons.h" />
+    <ClInclude Include="source\kAzeware\features\widgets\widgets.h" />
+    <ClInclude Include="source\kAzeware\features\widgets\steam_avatar.h" />
+    <ClInclude Include="source\kAzeware\features\chams\chams.h" />
+    <ClInclude Include="source\kAzeware\features\hitlog\hitlog.h" />
+    <ClInclude Include="source\kAzeware\features\input_inject\input_inject.h" />
+    <ClInclude Include="source\kAzeware\features\enemy_spec\enemy_spec.h" />
+    <ClInclude Include="source\kAzeware\features\prediction\prediction.h" />
+    <ClInclude Include="source\kAzeware\features\skinchanger\skin_sdk.h" />
+    <ClInclude Include="source\kAzeware\features\skinchanger\skin_items.h" />
+    <ClInclude Include="source\kAzeware\features\skinchanger\skin_preview.h" />
+    <ClInclude Include="source\kAzeware\features\skinchanger\skinchanger.h" />
+    <ClInclude Include="source\kAzeware\features\skinchanger\skin_menu.h" />
+    <ClInclude Include="source\kAzeware\features\custom_paint\custom_paint.h" />
+    <ClInclude Include="source\kAzeware\interfaces\CCSGOInput\CCSGOInput.h" />
+    <ClInclude Include="source\kAzeware\interfaces\CGameEntitySystem\CGameEntitySystem.h" />
+    <ClInclude Include="source\kAzeware\interfaces\CUserCmd\CUserCmd.h" />
+    <ClInclude Include="source\kAzeware\interfaces\IEngineClient\IEngineClient.h" />
+    <ClInclude Include="source\kAzeware\interfaces\interfaces.h" />
+    <ClInclude Include="source\kAzeware\config\config.h" />
+    <ClInclude Include="source\kAzeware\config\language.h" />
+    <ClInclude Include="source\kAzeware\config\translation_catalog.h" />
+    <ClInclude Include="source\kAzeware\config\translated_ui.h" />
+    <ClInclude Include="source\kAzeware\config\configmanager.h" />
+    <ClInclude Include="source\kAzeware\hooks\hooks.h" />
+    <ClInclude Include="source\kAzeware\hooks\includeHooks.h" />
+    <ClInclude Include="source\kAzeware\keybinds\keybinds.h" />
+    <ClInclude Include="source\kAzeware\menu\hud.h" />
+    <ClInclude Include="source\kAzeware\offsets\offsets.h" />
+    <ClInclude Include="source\kAzeware\utils\fnv1a\fnv1a.h" />
+    <ClInclude Include="source\kAzeware\utils\logging\log.h" />
+    <ClInclude Include="source\kAzeware\utils\console\console.h" />
+    <ClInclude Include="source\kAzeware\utils\math\utlmemory\utlmemory.h" />
+    <ClInclude Include="source\kAzeware\utils\math\utlstring\utlstring.h" />
+    <ClInclude Include="source\kAzeware\utils\math\utlstronghandle\utlstronghandle.h" />
+    <ClInclude Include="source\kAzeware\utils\math\utlvector\utlvector.h" />
+    <ClInclude Include="source\kAzeware\utils\math\vector\vector.h" />
+    <ClInclude Include="source\kAzeware\utils\math\viewmatrix\viewmatrix.h" />
+    <ClInclude Include="source\kAzeware\utils\memory\Interface\Interface.h" />
+    <ClInclude Include="source\kAzeware\utils\memory\memorycommon.h" />
+    <ClInclude Include="source\kAzeware\utils\memory\gaa\gaa.h" />
+    <ClInclude Include="source\kAzeware\utils\cvar\cvar.h" />
+    <ClInclude Include="source\kAzeware\utils\memory\patternscan\patternscan.h" />
+    <ClInclude Include="source\kAzeware\utils\memory\vfunc\vfunc.h" />
+    <ClInclude Include="source\kAzeware\utils\module\module.h" />
+    <ClInclude Include="source\kAzeware\utils\crypto\xorstr.h" />
+    <ClInclude Include="source\kAzeware\utils\security\crashdump.h" />
+    <ClInclude Include="source\kAzeware\utils\security\sehsupport.h" />
+    <ClInclude Include="source\kAzeware\utils\security\secure_allow.h" />
+    <ClInclude Include="source\kAzeware\renderer\renderer.h" />
+    <ClInclude Include="source\kAzeware\kAzeware.h" />
+    <ClInclude Include="source\includes.h" />
+    <ClInclude Include="source\kAzeware\menu\menu.h" />
+    <ClInclude Include="source\kAzeware\menu\menu_ui.h" />
+    <ClInclude Include="source\kAzeware\features\visuals\visuals.h" />
+    <ClInclude Include="source\kAzeware\features\visuals\weapon_icon_draw.h" />
+    <ClInclude Include="source\kAzeware\features\visuals\assets\weapon_icon_atlas.hpp" />
+    <ClInclude Include="source\kAzeware\utils\schema\schema.h" />
+    <ClInclude Include="source\cs2\sdk\IGameEvent.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="kAzeware.rc" />
+    <None Include="resources\hitsounds\**\*" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ItemGroup>
+    <ClCompile Include="source\kAzeware\features\ragebot\angles.cpp"><ObjectFileName>$(IntDir)rage_angles.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="source\kAzeware\features\ragebot\anti_aim.cpp"><ObjectFileName>$(IntDir)rage_anti_aim.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="source\kAzeware\features\ragebot\menu.cpp"><ObjectFileName>$(IntDir)rage_menu.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="source\kAzeware\features\ragebot\history.cpp"><ObjectFileName>$(IntDir)rage_history.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="source\kAzeware\features\ragebot\melee.cpp"><ObjectFileName>$(IntDir)rage_melee.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="source\kAzeware\features\ragebot\motion.cpp"><ObjectFileName>$(IntDir)rage_motion.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="source\kAzeware\features\ragebot\profiles.cpp"><ObjectFileName>$(IntDir)rage_profiles.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="source\kAzeware\features\ragebot\rage.cpp"><ObjectFileName>$(IntDir)rage_rage.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="source\kAzeware\features\ragebot\shots.cpp"><ObjectFileName>$(IntDir)rage_shots.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="source\kAzeware\features\ragebot\target.cpp"><ObjectFileName>$(IntDir)rage_target.obj</ObjectFileName></ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\kAzeware\features\ragebot\angles.h" />
+    <ClInclude Include="source\kAzeware\features\ragebot\anti_aim.h" />
+    <ClInclude Include="source\kAzeware\features\ragebot\motion.h" />
+    <ClInclude Include="source\kAzeware\features\ragebot\history.h" />
+    <ClInclude Include="source\kAzeware\features\ragebot\melee.h" />
+    <ClInclude Include="source\kAzeware\features\ragebot\knife_plan.h" />
+    <ClInclude Include="source\kAzeware\features\ragebot\profiles.h" />
+    <ClInclude Include="source\kAzeware\features\ragebot\rage.h" />
+    <ClInclude Include="source\kAzeware\features\ragebot\settings.h" />
+    <ClInclude Include="source\kAzeware\features\ragebot\shots.h" />
+    <ClInclude Include="source\kAzeware\features\ragebot\target.h" />
+  </ItemGroup>
+  <ItemGroup><ClInclude Include="source\kAzeware\features\world\skybox.h" /></ItemGroup>
+</Project>
+
+
+
+
+
+
