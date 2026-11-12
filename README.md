@@ -2,7 +2,7 @@
 
 **有全部功能的 CS2 HvH 菜单**
 
-[下载版本](https://github.com/KaguraWang/kAzeware/releases) · [浏览源码](kAzeware/source) · [MIT License](LICENSE)
+[下载版本](https://github.com/KaguraWang/kAzeware/releases) · [浏览源码](kAzeware/source) · [Apache 2.0](LICENSE)
 
 ![kAzeware 实机总预览](docs/images/overview.png)
 
@@ -146,11 +146,17 @@ $env:CL='/FS'
 & 'C:/Program Files (x86)/Microsoft Visual Studio/18/BuildTools/MSBuild/Current/Bin/MSBuild.exe' kAzeware.sln /m:1 /t:Build /p:Configuration=Release /p:Platform=x64 /p:MultiProcessorCompilation=false /v:minimal /nologo
 ```
 
-DLL 输出 `bin/x64/Release/kAzeware.dll`；解决方案另含可选加载器。第三方依赖保留各自许可证，上游授权见 [LICENSE](LICENSE)。
+DLL 输出 `bin/x64/Release/kAzeware.dll`；解决方案另含可选加载器。项目采用 [Apache License 2.0](LICENSE)；上游版权及第三方授权说明见 [NOTICE](NOTICE)，原有第三方许可证继续保留。
 
 </details>
 
 ## 版本公告
+
+### 源码授权更新 · 2026-11-12
+
+- 项目源码采用 Apache License 2.0，并保留上游和第三方版权声明。
+- 全部 362 个代码文件各加入一行 Apache 2.0 提示注释。
+- 本次为源码授权和注释更新，已发布 DLL 未重新打包。
 
 ### alpha-0.0.1 · 2026-11-12
 
